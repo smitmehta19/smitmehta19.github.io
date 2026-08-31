@@ -254,18 +254,15 @@
     body.readable .banner { text-shadow: none; }
     body.readable pre.portrait, body.readable .cursor, body.readable .glow { text-shadow: none; box-shadow: none; }
     body.readable .about-copy p, body.readable .ls .ds, body.readable .gitlog .note,
-    body.readable .kv, body.readable .motd, body.readable .banner-sub,
+    body.readable .kv, body.readable .banner-sub,
     body.readable .socials, body.readable .shell-hint {
       font-family: Inter, "Segoe UI", sans-serif;
       font-size: 16px;
       letter-spacing: 0;
     }
-    body.readable .kv b, body.readable .motd b, body.readable .banner-sub b { font-weight: 600; }
+    body.readable .kv b, body.readable .banner-sub b { font-weight: 600; }
 
     main { max-width: 900px; margin: 0 auto; padding: 3.2rem 1.4rem 4rem; }
-
-    .motd { color: var(--dim); font-size: 12.5px; margin-bottom: 2.4rem; }
-    .motd b { color: var(--text); font-weight: 400; }
 
     pre.banner {
       color: var(--ac); text-shadow: 0 0 14px var(--ac-glow);
@@ -449,8 +446,6 @@
   </div>
 
   <main>
-    <p class="motd">Last login: <span id="login-date">Sun Aug 31 2026</span> from dublin.local · type <b>help</b> in the prompt below, or press <b>/</b><span id="gh-live"></span></p>
-
     <!-- banner -->
     <section>
       <h1 class="sr-only">Smit Mehta, Senior Data Analyst and AI Engineer, Dublin</h1>
@@ -576,7 +571,7 @@
       <h2 class="sr-only">Projects</h2>
       <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed" data-type>ls projects/ --sort=year --reverse</span></p>
       <div class="out reveal">
-        <p class="kv">total 11 · live apps open directly · [ code ] goes to GitHub</p>
+        <p class="kv">total 9 · live apps open directly · [ code ] goes to GitHub</p>
         <table class="ls">
           <tbody>
             <tr><td class="yr">2026</td><td class="ty">tool</td><td class="nm"><a href="https://smitmehta19.github.io/SwissPDF/" rel="noopener">SwissPDF</a><a class="aux" href="https://github.com/smitmehta19/SwissPDF" rel="noopener">[ code ]</a></td><td class="ds">30 client-side PDF tools, zero backend, live app</td></tr>
@@ -586,10 +581,8 @@
             <tr><td class="yr">2026</td><td class="ty">system</td><td class="nm"><a href="https://github.com/smitmehta19/second-brain" rel="noopener">second-brain</a></td><td class="ds">notes pipeline: capture, index, resurface</td></tr>
             <tr><td class="yr">2026</td><td class="ty">app</td><td class="nm"><a href="https://smitmehta19.github.io/home-workout-app/" rel="noopener">home-gym</a><a class="aux" href="https://github.com/smitmehta19/home-workout-app" rel="noopener">[ code ]</a></td><td class="ds">guided workouts with progressive overload, live app</td></tr>
             <tr><td class="yr">2026</td><td class="ty">app</td><td class="nm"><a href="https://smitmehta19.github.io/cookflow/" rel="noopener">cookflow</a><a class="aux" href="https://github.com/smitmehta19/cookflow" rel="noopener">[ code ]</a></td><td class="ds">meal planning and shopping lists, live app</td></tr>
-            <tr><td class="yr">2020+</td><td class="ty">python</td><td class="nm"><a href="https://github.com/smitmehta19/Web_Scraping_Projects" rel="noopener">web-scrapers</a></td><td class="ds">scraper toolkit, running since 2020</td></tr>
             <tr><td class="yr">2023</td><td class="ty">nlp</td><td class="nm">industry-classifier<span class="ptag">[ private ]</span></td><td class="ds">KeyBERT industry classification</td></tr>
             <tr><td class="yr">2026</td><td class="ty">agents</td><td class="nm">prompt-generator<span class="ptag">[ local ]</span></td><td class="ds">website capture to build prompts; built this site</td></tr>
-            <tr><td class="yr">2022</td><td class="ty">desktop</td><td class="nm"><a href="https://github.com/smitmehta19/Flash-Screen-Recorder" rel="noopener">flash-recorder</a></td><td class="ds">Electron screen recorder</td></tr>
           </tbody>
         </table>
       </div>
@@ -661,8 +654,6 @@
       const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       /* ---------- live clock ---------- */
-      const loginDate = document.getElementById("login-date");
-      if (loginDate) loginDate.textContent = new Date().toDateString();
       const clock = document.getElementById("clock");
       const tickClock = () => {
         const short = innerWidth <= 640;
@@ -845,8 +836,6 @@
         "home-gym": "https://smitmehta19.github.io/home-workout-app/",
         cookflow: "https://smitmehta19.github.io/cookflow/",
         "second-brain": "https://github.com/smitmehta19/second-brain",
-        "web-scrapers": "https://github.com/smitmehta19/Web_Scraping_Projects",
-        "flash-recorder": "https://github.com/smitmehta19/Flash-Screen-Recorder",
         "job-radar": null,
         "lead-pipelines": null,
         "industry-classifier": null,
@@ -915,10 +904,6 @@
           const r = await fetch("https://api.github.com/users/smitmehta19/repos?sort=pushed&per_page=6", { signal: ctl.signal });
           if (!r.ok) return;
           ghRepos = await r.json();
-          const el = document.getElementById("gh-live");
-          if (el && ghRepos[0]) {
-            el.innerHTML = ` · github: <b>${ghRepos[0].name}</b> pushed ${relTime(ghRepos[0].pushed_at)}`;
-          }
         } catch (e) { /* offline is fine */ }
       })();
 
@@ -974,7 +959,7 @@
             "<b>Host</b>:     TAMI, Dublin\n" +
             "<b>Kernel</b>:   MSc-Data-Analytics (DCU)\n" +
             "<b>Uptime</b>:   5+ years in data &amp; AI\n" +
-            "<b>Packages</b>: 11 projects · 10 certs\n" +
+            "<b>Packages</b>: 9 projects · 10 certs\n" +
             "<b>Shell</b>:    /bin/analysis\n" +
             "<b>Memory</b>:   a great many spreadsheets\n" +
             "<b>Status</b>:   open to opportunities" +
