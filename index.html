@@ -223,10 +223,8 @@
     .tmux .seg.active { background: var(--ac); color: #0a0c0f; padding: 0.05rem 0.6rem; font-weight: 700; }
     .tmux .grow { flex: 1; }
     .tmux .clock { color: var(--text); }
-    .tmux .status { color: var(--ac); }
     @media (max-width: 640px) { .tmux .hide-sm { display: none; } }
     @media (max-width: 1100px) { .tmux .t-py { display: none; } }
-    @media (max-width: 940px) { .tmux .status { display: none; } }
     @media (max-width: 760px) { .tmux .t-repo, .tmux .t-dub { display: none; } }
     @media (max-width: 640px) {
       .tmux { gap: 0.5rem; padding: 0.45rem 0.7rem; }
@@ -253,7 +251,7 @@
     body.readable { animation: none !important; }
     body.readable .banner { text-shadow: none; }
     body.readable pre.portrait, body.readable .cursor, body.readable .glow { text-shadow: none; box-shadow: none; }
-    body.readable .about-copy p:not(.cmd), body.readable .ls .ds, body.readable .gitlog .note,
+    body.readable .about-copy p:not(.cmd), body.readable .ls .ds,
     body.readable .kv, body.readable .banner-sub,
     body.readable .socials, body.readable .shell-hint {
       font-family: Inter, "Segoe UI", sans-serif;
@@ -312,11 +310,11 @@
     table { border-collapse: collapse; width: 100%; }
     .ls td { padding: 0.34rem 1.2rem 0.34rem 0; vertical-align: baseline; }
     .ls .yr { color: var(--dim); white-space: nowrap; }
-    .ls .ty { color: var(--green); white-space: nowrap; font-size: 13px; }
+    .ls .ty { color: var(--green); white-space: nowrap; }
     .ls .nm a { border-bottom: none; font-weight: 700; }
     .ls .nm .aux { color: var(--green); font-size: 12px; font-weight: 400; border-bottom: none; margin-left: 0.7rem; white-space: nowrap; }
     .ls .nm .ptag { color: var(--dim); font-size: 11.5px; margin-left: 0.7rem; white-space: nowrap; }
-    .ls .ds { color: var(--dim); font-size: 13.5px; }
+    .ls .ds { color: var(--dim); }
     .ls tr { transition: background 0.15s; }
     .ls tr:hover td, .ls tr:hover td * { background: var(--ac); color: #0a0c0f !important; text-shadow: none; }
     @media (max-width: 640px) { .ls .ds { display: none; } body { font-size: 13.5px; } }
@@ -337,31 +335,22 @@
       display: flex; justify-content: space-between; align-items: baseline;
       gap: 1rem; max-width: 78ch;
     }
-    .xp .xco { color: var(--bright); font-weight: 700; font-size: 16px; }
+    .xp .xco { color: var(--bright); font-weight: 700; }
     .xtag {
       color: var(--ac); font-size: 11px;
       letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
     }
     .bullets { list-style: none; margin: 0.75rem 0 0; padding-left: 2ch; max-width: 76ch; }
-    .bullets li { color: var(--text); font-size: 13.5px; padding: 0.24rem 0 0.24rem 2ch; text-indent: -2ch; }
+    .bullets li { color: var(--text); padding: 0.24rem 0 0.24rem 2ch; text-indent: -2ch; }
     .bullets li::before { content: "- "; color: var(--ac); }
     .bullets i { color: var(--dim); font-style: normal; }
     .bullets b { color: var(--ac); font-weight: 700; white-space: nowrap; }
 
     /* tree output for education + certs */
-    pre.tree { font-size: 13.5px; line-height: 1.7; overflow-x: auto; }
+    pre.tree { line-height: 1.7; overflow-x: auto; }
     pre.tree .dir { color: var(--ac); }
     pre.tree .yr { color: var(--green); }
     pre.tree .dots { color: rgba(201, 207, 214, 0.25); }
-
-    /* git log */
-    .gitlog { max-width: 70ch; }
-    .gitlog .row { display: flex; gap: 0.9rem; padding: 0.3rem 0; }
-    .gitlog .hash { color: var(--ac); }
-    .gitlog .head { color: var(--green); }
-    .gitlog .msg { color: var(--bright); }
-    .gitlog .note { color: var(--dim); font-size: 13px; padding-left: 6.4rem; }
-    .gitlog .when { color: var(--dim); margin-left: auto; white-space: nowrap; }
 
     .mailbig { font-size: clamp(1.1rem, 3.6vw, 1.6rem); font-weight: 700; }
     .socials { margin-top: 0.8rem; color: var(--dim); }
@@ -443,7 +432,6 @@
     <button class="tico" id="reader-toggle" aria-pressed="false" aria-label="Toggle readable mode" title="Readable mode">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
     </button>
-    <span class="status hide-sm" aria-hidden="true">OPEN TO OPPORTUNITIES</span>
     <span class="seg t-dub" aria-hidden="true">Dublin</span>
     <span class="seg" id="wx" aria-hidden="true"></span>
     <span class="clock" id="clock" aria-hidden="true">--:--:--</span>
