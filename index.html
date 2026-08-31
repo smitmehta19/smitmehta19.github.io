@@ -294,7 +294,8 @@
     .signal-stage { display: none; width: 100%; max-width: 300px; }
     #signal-canvas { width: 100%; height: 340px; display: block; }
     body.readable .signal-stage { display: none !important; }
-    body.readable pre.portrait { display: block !important; }
+    body.readable pre.portrait { display: none !important; }
+    body.readable .about-grid { grid-template-columns: 1fr; gap: 0; }
     @media (max-width: 760px) {
       .signal-stage { max-width: 250px; margin: 0 auto; }
       #signal-canvas { height: 280px; }
@@ -395,7 +396,6 @@
     }
     @media (hover: none) { .chips button { min-height: 44px; padding: 0.2rem 1rem; } }
     .chips button:hover { background: var(--ac); color: #0a0c0f; }
-    @media (hover: none) { .chips button[data-run="snake"] { display: none; } }
 
     /* snake board + neofetch card printed into the scrollback */
     #shell-out pre.game {
@@ -642,7 +642,7 @@
         <button data-run="neofetch">neofetch</button>
         <button data-run="gh">gh</button>
         <button data-run="weather">weather</button>
-        <button data-run="snake">snake</button>
+        <button data-run="breaker">breaker</button>
         <button data-run="sudo hire smit">hire me</button>
       </p>
       <div id="shell-out" role="log" aria-live="polite"></div>
@@ -875,7 +875,7 @@
           "  <b>weather</b>         live from Dublin's sky\n" +
           "  <b>neofetch</b>        the system card\n" +
           "  <b>fortune</b> · <b>cowsay</b>  wisdom delivery systems\n" +
-          "  <b>snake</b>           you know what this is\n" +
+          "  <b>breaker</b>         brick breaker, thumb friendly\n" +
           "  <b>theme</b> &lt;amber|green&gt;  phosphor of choice\n" +
           "  <b>clear</b>           wipe the scrollback\n" +
           "  &hellip;and a few this help does not admit to"),
@@ -981,68 +981,104 @@
             "</div></div>");
         },
         fortune: () => print(FORTUNES[(Math.random() * FORTUNES.length) | 0], "okx"),
-        snake: () => startSnake(),
+        breaker: () => startBreaker(),
+        snake: () => { print("snake retired. deploying breaker&hellip;", "okx"); startBreaker(); },
         matrix: () => startMatrix(),
       });
 
-      /* ---------- snake ---------- */
+      /* ---------- brick breaker ---------- */
       let gameActive = false;
-      function startSnake() {
+      function startBreaker() {
         if (gameActive) return print("a game is already running.", "err");
         gameActive = true;
-        const W = 26, H = 13;
-        const pre = document.createElement("pre");
-        pre.className = "game";
-        out.appendChild(pre);
-        let snk = [[13, 6], [12, 6], [11, 6]];
-        let dir = [1, 0], nextDir = dir, food = null, score = 0, dead = false;
-        const place = () => {
-          do {
-            food = [(Math.random() * W) | 0, (Math.random() * H) | 0];
-          } while (snk.some((s) => s[0] === food[0] && s[1] === food[1]));
-        };
-        place();
-        const draw = () => {
-          const g = [];
-          for (let y = 0; y < H; y++) g.push(new Array(W).fill(" "));
-          g[food[1]][food[0]] = "*";
-          snk.forEach((s, i) => { g[s[1]][s[0]] = i === 0 ? "█" : "▓"; });
-          pre.textContent =
-            "┌" + "─".repeat(W) + "┐\n" +
-            g.map((r) => "│" + r.join("") + "│").join("\n") +
-            "\n└" + "─".repeat(W) + "┘\nscore: " + score + "   (arrows or wasd · q quits)";
-        };
-        const end = (crashed) => {
-          if (dead) return;
-          dead = true;
+        const cv = document.createElement("canvas");
+        cv.width = Math.min(out.clientWidth || 420, 420);
+        cv.height = 280;
+        cv.style.cssText = "display:block;margin:0.4rem 0;max-width:100%;touch-action:none;";
+        out.appendChild(cv);
+        const ctx = cv.getContext("2d");
+        const acColor = () => getComputedStyle(document.documentElement).getPropertyValue("--ac").trim() || "#e3b25f";
+        const W = cv.width, H = cv.height, pw = 64, ph = 7;
+        let px = (W - pw) / 2;
+        let bx = W / 2, by = H - 46, vx = 2.2, vy = -3.0;
+        const rows = 4, cols = 8, bh = 13, bw = (W - 20) / cols;
+        const bricks = [];
+        for (let r = 0; r < rows; r++)
+          for (let c = 0; c < cols; c++)
+            bricks.push({ x: 10 + c * bw, y: 30 + r * (bh + 5), r });
+        let score = 0, done = false;
+        const end = (msg, cls) => {
+          if (done) return;
+          done = true;
           gameActive = false;
-          clearInterval(timer);
           window.removeEventListener("keydown", key, true);
-          print(crashed ? `crash. final score: ${score}. type snake to retry.` : `snake exited. score: ${score}.`, crashed ? "err" : "okx");
+          print(`${msg} final score: ${score}. type breaker to retry.`, cls);
         };
         const key = (e) => {
           const k = e.key.toLowerCase();
-          const map = { arrowup: [0, -1], arrowdown: [0, 1], arrowleft: [-1, 0], arrowright: [1, 0], w: [0, -1], s: [0, 1], a: [-1, 0], d: [1, 0] };
-          if (map[k]) {
+          if (k === "arrowleft" || k === "a") {
             e.preventDefault();
-            const d = map[k];
-            if (d[0] !== -dir[0] || d[1] !== -dir[1]) nextDir = d;
-          } else if (k === "q" || k === "escape") end(false);
+            px = Math.max(0, px - 26);
+          } else if (k === "arrowright" || k === "d") {
+            e.preventDefault();
+            px = Math.min(W - pw, px + 26);
+          } else if (k === "q" || k === "escape") end("breaker exited.", "okx");
         };
-        const timer = setInterval(() => {
-          dir = nextDir;
-          const head = [snk[0][0] + dir[0], snk[0][1] + dir[1]];
-          if (head[0] < 0 || head[0] >= W || head[1] < 0 || head[1] >= H ||
-              snk.some((s) => s[0] === head[0] && s[1] === head[1])) return end(true);
-          snk.unshift(head);
-          if (head[0] === food[0] && head[1] === food[1]) { score += 10; place(); }
-          else snk.pop();
-          draw();
-        }, 120);
+        const point = (e) => {
+          const r = cv.getBoundingClientRect();
+          const x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+          px = Math.max(0, Math.min(W - pw, x * (W / r.width) - pw / 2));
+        };
+        cv.addEventListener("mousemove", point);
+        cv.addEventListener("touchstart", (e) => { e.preventDefault(); point(e); }, { passive: false });
+        cv.addEventListener("touchmove", (e) => { e.preventDefault(); point(e); }, { passive: false });
+        const loop = () => {
+          if (done) return;
+          if (!cv.isConnected) return end("breaker exited.", "okx");
+          bx += vx; by += vy;
+          if ((bx < 5 && vx < 0) || (bx > W - 5 && vx > 0)) vx = -vx;
+          if (by < 5 && vy < 0) vy = -vy;
+          if (vy > 0 && by > H - 16 - ph && by < H - 6 && bx > px - 5 && bx < px + pw + 5) {
+            vy = -Math.abs(vy);
+            vx = Math.max(-4.2, Math.min(4.2, vx + ((bx - (px + pw / 2)) / (pw / 2)) * 1.4));
+          }
+          if (by > H + 6) return end("the ball is gone.", "err");
+          for (let i = 0; i < bricks.length; i++) {
+            const b = bricks[i];
+            if (bx > b.x && bx < b.x + bw - 3 && by > b.y && by < b.y + bh) {
+              bricks.splice(i, 1);
+              score += 10;
+              vy = -vy * 1.015;
+              vy = Math.max(-5, Math.min(5, vy));
+              break;
+            }
+          }
+          if (!bricks.length) return end("all bricks down. flawless.", "okx");
+          const AC = acColor();
+          ctx.clearRect(0, 0, W, H);
+          ctx.globalAlpha = 0.35;
+          ctx.strokeStyle = AC;
+          ctx.strokeRect(0.5, 0.5, W - 1, H - 1);
+          bricks.forEach((b) => {
+            ctx.globalAlpha = 1 - b.r * 0.18;
+            ctx.fillStyle = AC;
+            ctx.fillRect(b.x, b.y, bw - 3, bh);
+          });
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = AC;
+          ctx.fillRect(px, H - 16, pw, ph);
+          ctx.beginPath();
+          ctx.arc(bx, by, 4, 0, 7);
+          ctx.fill();
+          ctx.font = "12px 'JetBrains Mono', monospace";
+          ctx.fillText("score " + score, 10, 18);
+          requestAnimationFrame(loop);
+        };
         window.addEventListener("keydown", key, true);
         input.blur();
-        draw();
-        pre.scrollIntoView({ block: "nearest" });
+        loop();
+        cv.scrollIntoView({ block: "nearest" });
+        print("drag (or arrow keys) to move the paddle · q quits", "in-echo");
       }
 
       /* ---------- matrix rain ---------- */
@@ -1492,7 +1528,7 @@
       });
 
       // rotating hint placeholder
-      const HINTS = ["try: help", "try: sudo hire smit", "try: snake", "try: neofetch", "try: degauss", "try: poweroff", "try: gh", "try: theme green"];
+      const HINTS = ["try: help", "try: sudo hire smit", "try: breaker", "try: neofetch", "try: degauss", "try: poweroff", "try: gh", "try: theme green"];
       let hIdx = 0;
       input.placeholder = HINTS[0];
       setInterval(() => { input.placeholder = HINTS[++hIdx % HINTS.length]; }, 4000);
@@ -1672,13 +1708,19 @@
 
     var pointer = { x: 0, y: 0 };
     var visible = false;
-    window.addEventListener("mousemove", function (e) {
+    var trackPoint = function (cx, cy) {
       if (!visible) return;
       var r = canvas.getBoundingClientRect();
-      var px = ((e.clientX - r.left) / r.width) * 2 - 1;
-      var py = -(((e.clientY - r.top) / r.height) * 2 - 1);
+      var px = ((cx - r.left) / r.width) * 2 - 1;
+      var py = -(((cy - r.top) / r.height) * 2 - 1);
       pointer.x = Math.max(-1.6, Math.min(1.6, px));
       pointer.y = Math.max(-1.6, Math.min(1.6, py));
+    };
+    window.addEventListener("mousemove", function (e) {
+      trackPoint(e.clientX, e.clientY);
+    }, { passive: true });
+    window.addEventListener("touchmove", function (e) {
+      if (e.touches.length) trackPoint(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: true });
 
     var img = new Image();
