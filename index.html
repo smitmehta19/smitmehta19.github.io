@@ -268,6 +268,14 @@
       line-height: 1.25; overflow-x: auto; margin: 0.6rem 0 0.2rem;
     }
     .banner-sub { color: var(--dim); margin-bottom: 0.4rem; }
+    .stamp4 { color: var(--ac); font-weight: 700; }
+    @media (prefers-reduced-motion: no-preference) {
+      .stamp4 { animation: stampblink 1.8s ease-in-out infinite; }
+      @keyframes stampblink {
+        0%, 100% { opacity: 1; text-shadow: 0 0 12px var(--ac-glow); }
+        50% { opacity: 0.5; text-shadow: none; }
+      }
+    }
     .banner-sub b { color: var(--bright); font-weight: 700; }
     .status-pill { display: inline-block; margin-top: 0.6rem; color: var(--ac); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
 
@@ -448,7 +456,7 @@
 ╚════██║██║╚██╔╝██║██║   ██║       ██║╚██╔╝██║██╔══╝  ██╔══██║   ██║   ██╔══██║
 ███████║██║ ╚═╝ ██║██║   ██║       ██║ ╚═╝ ██║███████╗██║  ██║   ██║   ██║  ██║
 ╚══════╝╚═╝     ╚═╝╚═╝   ╚═╝       ╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝</pre>
-        <p class="banner-sub"><b>Senior Data Analyst &amp; AI Engineer</b> · Dublin, Ireland · 53.35N 6.26W</p>
+        <p class="banner-sub"><b>Senior Data Analyst &amp; AI Engineer</b> · <span class="stamp4">Stamp 4</span> · Dublin, Ireland · 53.35N 6.26W</p>
         <p class="banner-sub">I take AI systems from prototype to production, with the evaluation to prove they work.</p>
         <span class="status-pill">[ open to: senior data analyst · senior data engineer · ai engineer ]</span>
       </div>
@@ -503,7 +511,7 @@
           <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed">whoami</span></p>
           <p>Smit. Dublin. I build AI/ML systems that go to production, and
           small tools that fix whatever annoyed me last week.</p>
-          <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed">ls ~/build</span></p>
+          <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed">cat build.md</span></p>
           <p>I work on building data pipelines that can handle real-world
           scale, not just small datasets. I develop machine learning models
           that actually make it into production, and build LLM-powered
@@ -586,8 +594,8 @@
       <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed" data-type>tree education/ certs/</span></p>
       <div class="out reveal">
 <pre class="tree"><span class="dir">education/</span>
-├── MSc Data Analytics <span class="dots">..............</span> Dublin City University, Ireland
-└── B.E. Information Technology <span class="dots">.....</span> University of Mumbai, India
+├── MSc Data Analytics <span class="dots">.....................</span> Dublin City University, Ireland
+└── B.E. Information Technology <span class="dots">................</span> University of Mumbai, India
 <span class="dir">certs/</span>
 ├── Claude 101 · Anthropic Academy <span class="dots">....................................</span> <span class="yr">2026</span>
 ├── Introduction to Claude Cowork · Anthropic Academy <span class="dots">.................</span> <span class="yr">2026</span>
@@ -609,15 +617,14 @@
     <!-- contact -->
     <section>
       <h2 class="sr-only">Contact</h2>
-      <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed" data-type>mail -s "data problem worth solving"</span></p>
+      <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed" data-type>./say-hello.sh</span></p>
       <div class="out reveal">
         <p class="mailbig"><a href="mailto:smitm515@gmail.com">smitm515@gmail.com</a></p>
-        <p class="kv" style="margin-top:0.7rem;">looking for: <b>Senior Data Analyst · Senior Data Engineer · AI Engineer</b></p>
-        <p class="kv">Dublin based · authorised to work in Ireland <b>(Stamp 4, no sponsorship required)</b> · open to relocation</p>
-        <p class="socials">
-          <a href="https://github.com/smitmehta19" rel="noopener">github/smitmehta19</a>
-          <a href="https://www.linkedin.com/in/smitmehta19" rel="noopener">linkedin/smitmehta19</a>
-        </p>
+        <div class="yml" style="margin-top: 1rem;">
+          <div class="yrow"><span class="yk">location:</span><span class="yv">Dublin, Ireland · open to relocation</span></div>
+          <div class="yrow"><span class="yk">work_auth:</span><span class="yv"><b style="color:var(--ac)">Stamp 4</b> · no sponsorship required</span></div>
+          <div class="yrow"><span class="yk">links:</span><span class="yv"><a href="https://github.com/smitmehta19" rel="noopener">github/smitmehta19</a> · <a href="https://www.linkedin.com/in/smitmehta19" rel="noopener">linkedin/smitmehta19</a></span></div>
+        </div>
       </div>
     </section>
 
