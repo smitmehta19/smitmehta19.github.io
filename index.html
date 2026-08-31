@@ -253,7 +253,7 @@
     body.readable { animation: none !important; }
     body.readable .banner { text-shadow: none; }
     body.readable pre.portrait, body.readable .cursor, body.readable .glow { text-shadow: none; box-shadow: none; }
-    body.readable .about-copy p, body.readable .ls .ds, body.readable .gitlog .note,
+    body.readable .about-copy p:not(.cmd), body.readable .ls .ds, body.readable .gitlog .note,
     body.readable .kv, body.readable .banner-sub,
     body.readable .socials, body.readable .shell-hint {
       font-family: Inter, "Segoe UI", sans-serif;
@@ -300,6 +300,10 @@
 
     .about-copy p { max-width: 58ch; }
     .about-copy p + p { margin-top: 1rem; }
+    .about-copy p.cmd { margin-top: 1.7rem; }
+    .about-copy p.cmd:first-child { margin-top: 0; }
+    .about-copy p.cmd + p { margin-top: 0.55rem; }
+    .about-copy p.lsl + p.lsl { margin-top: 0.15rem; }
     .kv { color: var(--dim); }
     .kv b { color: var(--text); font-weight: 400; }
     @media (max-width: 760px) { .about-grid { grid-template-columns: 1fr; } pre.portrait { font-size: 5.2px; } }
@@ -509,17 +513,18 @@
 -      --    --    --- +%@@@@@@@@%**#%@@%*@+
 -     - --    -    --- =%@@@@@@@%#%@@@@@##@=        .</pre>
         <div class="about-copy">
-          <p>Senior Data Analyst at TAMI in Dublin, building the data and
-          AI systems behind a live B2B prospecting platform: a Databricks
-          lakehouse with tested ETL/ELT, Elasticsearch and MongoDB at
-          scale, production XGBoost models pricing 20M+ companies, and
-          LLM systems (RAG, evaluation with RAGAS + MLflow) that ship.</p>
-          <p>MSc in Data Analytics from Dublin City University. Outside
-          work I ship fast, private web tools with LLM tooling: a 30-tool
-          PDF suite, a speed reader, a job-search radar.</p>
-          <p class="kv">looking for: <b>senior data analyst · LLM data engineer · GenAI developer</b></p>
-          <p class="kv">uptime: <b>5+ years in data &amp; AI</b> · models in production for <b>20M+ records</b> · mentored <b>9 analysts</b></p>
-          <p class="kv">contact: <a href="mailto:smitm515@gmail.com">smitm515@gmail.com</a> · <a href="https://www.linkedin.com/in/smitmehta19" rel="noopener">linkedin/smitmehta19</a></p>
+          <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed">whoami</span></p>
+          <p>Smit. Dublin. I build AI/ML systems that go to production, and
+          small tools that fix whatever annoyed me last week.</p>
+          <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed">ls ~/build</span></p>
+          <p class="lsl">data pipelines and lakehouses that hold up at real volume</p>
+          <p class="lsl">machine learning models that run in production, not in notebooks</p>
+          <p class="lsl">LLM systems with evaluation attached: RAG, agents, chatbots, MCP servers</p>
+          <p class="lsl">automation for the manual work nobody wants to keep doing</p>
+          <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed">cat otherwise.txt</span></p>
+          <p>badminton, anime, and a very slow campaign through Red Dead Redemption 2</p>
+          <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed">status</span></p>
+          <p class="kv">looking for: <b>Senior Data Analyst · Senior Data Engineer · AI Engineer</b></p>
         </div>
       </div>
     </section>
@@ -620,7 +625,7 @@
       <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed" data-type>mail -s "data problem worth solving"</span></p>
       <div class="out reveal">
         <p class="mailbig"><a href="mailto:smitm515@gmail.com">smitm515@gmail.com</a></p>
-        <p class="kv" style="margin-top:0.7rem;">looking for: <b>senior data analyst · LLM data engineer · GenAI developer</b></p>
+        <p class="kv" style="margin-top:0.7rem;">looking for: <b>Senior Data Analyst · Senior Data Engineer · AI Engineer</b></p>
         <p class="kv">Dublin based · authorised to work in Ireland <b>(Stamp 4, no sponsorship required)</b> · open to relocation</p>
         <p class="socials">
           <a href="https://github.com/smitmehta19" rel="noopener">github/smitmehta19</a>
