@@ -94,6 +94,33 @@
     }
     @media (prefers-reduced-motion: reduce) { .beam { display: none; } }
 
+    /* scroll progress: a thin charge of phosphor along the top edge */
+    #sprog {
+      position: fixed; top: 0; left: 0; right: 0; height: 2px; z-index: 56;
+      background: var(--ac); box-shadow: 0 0 10px var(--ac-glow);
+      transform-origin: 0 50%; transform: scaleX(0); pointer-events: none;
+    }
+
+    /* tracking tear: fast flicks knock the picture briefly */
+    #tear {
+      position: fixed; left: -2%; right: -2%; height: 4px; z-index: 49;
+      background: rgba(255, 255, 255, 0.12); mix-blend-mode: overlay;
+      opacity: 0; pointer-events: none; transform: skewX(-14deg);
+    }
+    #tear.on { opacity: 1; }
+
+    /* vertical hold slip: rare, only on violent jumps */
+    @media (prefers-reduced-motion: no-preference) {
+      body.vroll main { animation: vroll 0.3s ease-out; }
+      @keyframes vroll {
+        0% { transform: translateY(0); }
+        30% { transform: translateY(-10px); }
+        55% { transform: translateY(6px); }
+        78% { transform: translateY(-3px); }
+        100% { transform: translateY(0); }
+      }
+    }
+
     /* phosphor warm spot trailing the cursor */
     .pglow {
       position: fixed; top: 0; left: 0; width: 380px; height: 380px;
@@ -220,14 +247,21 @@
       padding: 0.45rem 1rem; font-size: 12.5px; white-space: nowrap; overflow: hidden;
     }
     .tmux .seg { color: var(--dim); }
-    .tmux .seg.active { background: var(--ac); color: #0a0c0f; padding: 0.05rem 0.6rem; font-weight: 700; }
-    .tmux button.seg { border: 0; font: inherit; cursor: pointer; transition: box-shadow 0.2s; }
-    .tmux button.seg:hover, .tmux button.seg:focus-visible { box-shadow: 0 0 12px var(--ac-glow); }
+    .wins { display: flex; gap: 0.15rem; align-items: center; min-width: 0; }
+    .win {
+      border: 0; font: inherit; background: none; color: var(--dim);
+      cursor: pointer; padding: 0.05rem 0.45rem; white-space: nowrap;
+      transition: color 0.15s, box-shadow 0.2s;
+    }
+    .win:hover, .win:focus-visible { color: var(--ac); }
+    .win.active { background: var(--ac); color: #0a0c0f; font-weight: 700; }
+    .win.active:hover { box-shadow: 0 0 12px var(--ac-glow); color: #0a0c0f; }
+    @media (max-width: 1100px) { .win:not(.active) .wn { display: none; } }
+    @media (max-width: 760px) { .win:not(.active) { display: none; } }
     .tmux .grow { flex: 1; }
     .tmux .clock { color: var(--text); }
     @media (max-width: 640px) { .tmux .hide-sm { display: none; } }
-    @media (max-width: 1100px) { .tmux .t-py { display: none; } }
-    @media (max-width: 760px) { .tmux .t-repo, .tmux .t-dub { display: none; } }
+    @media (max-width: 760px) { .tmux .t-dub { display: none; } }
     @media (max-width: 640px) {
       .tmux { gap: 0.5rem; padding: 0.45rem 0.7rem; }
       .tmux .tico { width: 38px; height: 38px; }
@@ -391,6 +425,8 @@
 <body>
   <div class="crt" aria-hidden="true"></div>
   <div class="beam" aria-hidden="true"></div>
+  <div id="sprog" aria-hidden="true"></div>
+  <div id="tear" aria-hidden="true"></div>
   <div id="glare" aria-hidden="true"></div>
   <div id="iband" aria-hidden="true"></div>
   <div class="pglow" aria-hidden="true" id="pglow"></div>
@@ -403,9 +439,16 @@
 
   <!-- tmux status bar -->
   <div class="tmux">
-    <button class="seg active" id="win0" aria-label="Back to top" title="Back to top">0:smit-mehta</button>
-    <span class="seg t-repo" aria-hidden="true">~/portfolio (main)</span>
-    <span class="seg t-py" aria-hidden="true">uptime: 5+ yrs in data &amp; ai</span>
+    <nav class="wins" aria-label="Page sections">
+      <button class="win active" data-target="top">0<span class="wn">:smit-mehta</span></button>
+      <button class="win" data-target="about">1<span class="wn">:about</span></button>
+      <button class="win" data-target="exp">2<span class="wn">:exp</span></button>
+      <button class="win" data-target="skills">3<span class="wn">:skills</span></button>
+      <button class="win" data-target="projects">4<span class="wn">:projects</span></button>
+      <button class="win" data-target="edu">5<span class="wn">:edu</span></button>
+      <button class="win" data-target="contact">6<span class="wn">:contact</span></button>
+      <button class="win" data-target="shell">7<span class="wn">:shell</span></button>
+    </nav>
     <span class="grow"></span>
     <a class="tico" href="https://github.com/smitmehta19" rel="noopener" aria-label="Smit Mehta on GitHub">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.17c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.75 2.69 1.25 3.35.95.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.66.41.35.77 1.05.77 2.12v3.14c0 .3.21.66.8.55A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
@@ -440,7 +483,7 @@
     </section>
 
     <!-- about + ascii portrait -->
-    <section>
+    <section id="about">
       <h2 class="sr-only">About</h2>
       <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed" data-type>cat about.md | project --hologram me.signal</span></p>
       <div class="out reveal about-grid">
@@ -502,7 +545,7 @@
     </section>
 
     <!-- experience git log -->
-    <section>
+    <section id="exp">
       <h2 class="sr-only">Experience</h2>
       <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed" data-type>cat experience.md</span></p>
       <div class="out reveal xp">
@@ -526,7 +569,7 @@
     </section>
 
     <!-- skills -->
-    <section>
+    <section id="skills">
       <h2 class="sr-only">Skills</h2>
       <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed" data-type>cat skills.yml</span></p>
       <div class="out reveal yml">
@@ -544,7 +587,7 @@
     </section>
 
     <!-- projects -->
-    <section>
+    <section id="projects">
       <h2 class="sr-only">Projects</h2>
       <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed" data-type>ls projects/ --sort=year --reverse</span></p>
       <div class="out reveal">
@@ -565,7 +608,7 @@
     </section>
 
     <!-- education + certifications -->
-    <section>
+    <section id="edu">
       <h2 class="sr-only">Education and certifications</h2>
       <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed" data-type>tree education/ certs/</span></p>
       <div class="out reveal">
@@ -591,7 +634,7 @@
     </section>
 
     <!-- contact -->
-    <section>
+    <section id="contact">
       <h2 class="sr-only">Contact</h2>
       <p class="cmd"><span class="ps1">smit@dublin:<span class="path">~</span>$</span> <span class="typed" data-type>./say-hello.sh</span></p>
       <div class="out reveal">
@@ -605,7 +648,7 @@
     </section>
 
     <!-- interactive shell -->
-    <section class="shell" aria-label="Interactive shell">
+    <section class="shell" id="shell" aria-label="Interactive shell">
       <h2 class="sr-only">Interactive shell</h2>
       <p class="shell-hint">this prompt is real: try <kbd>help</kbd>, <kbd>neofetch</kbd>, <kbd>theme green</kbd>, or <kbd>sudo hire smit</kbd> · <kbd>Tab</kbd> completes · <kbd>&uarr;</kbd> history</p>
       <p class="chips" aria-label="Quick commands">
@@ -642,25 +685,57 @@
       tickClock();
       setInterval(tickClock, 1000);
 
-      /* ---------- window 0: slow ride back to the top ---------- */
-      const win0 = document.getElementById("win0");
-      if (win0) {
-        win0.addEventListener("click", () => {
-          if (reduced) return window.scrollTo(0, 0);
-          const start = window.scrollY;
-          if (start < 2) return;
-          const t0 = performance.now();
-          const D = Math.min(1400, 550 + start * 0.18);
-          // timeouts, not rAF: keeps working in throttled tabs
-          const step = () => {
-            const p = Math.min(1, (performance.now() - t0) / D);
-            const e = 1 - Math.pow(1 - p, 3);
-            window.scrollTo(0, start * (1 - e));
-            if (p < 1) setTimeout(step, 16);
-          };
-          step();
+      /* ---------- tmux windows: glide nav, scroll spy, progress beam ---------- */
+      const glide = (targetY) => {
+        if (reduced) return window.scrollTo(0, targetY);
+        const start = window.scrollY;
+        const dist = targetY - start;
+        if (Math.abs(dist) < 2) return;
+        const t0 = performance.now();
+        const D = Math.min(1400, 550 + Math.abs(dist) * 0.18);
+        // timeouts, not rAF: keeps working in throttled tabs
+        const step = () => {
+          const p = Math.min(1, (performance.now() - t0) / D);
+          const e = 1 - Math.pow(1 - p, 3);
+          window.scrollTo(0, start + dist * e);
+          if (p < 1) setTimeout(step, 16);
+          else spy();
+        };
+        step();
+      };
+      const wins = Array.from(document.querySelectorAll(".win"));
+      const winTarget = (btn) =>
+        btn.dataset.target === "top" ? null : document.getElementById(btn.dataset.target);
+      let pinned = null, pinT = 0;
+      wins.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          pinned = btn;
+          clearTimeout(pinT);
+          pinT = setTimeout(() => { pinned = null; }, 2600);
+          const el = winTarget(btn);
+          glide(el ? el.getBoundingClientRect().top + window.scrollY - 24 : 0);
         });
-      }
+      });
+      const sprog = document.getElementById("sprog");
+      let spyQueued = false;
+      const spy = () => {
+        spyQueued = false;
+        const max = document.documentElement.scrollHeight - innerHeight;
+        if (sprog) sprog.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+        const probe = window.scrollY + innerHeight * 0.35;
+        let current = wins[0];
+        wins.forEach((btn) => {
+          const el = winTarget(btn);
+          if (el && el.getBoundingClientRect().top + window.scrollY <= probe) current = btn;
+        });
+        if (max - window.scrollY < 30) current = wins[wins.length - 1];
+        if (pinned) current = pinned;
+        wins.forEach((b) => b.classList.toggle("active", b === current));
+      };
+      window.addEventListener("scroll", () => {
+        if (!spyQueued) { spyQueued = true; setTimeout(spy, 80); }
+      }, { passive: true });
+      spy();
 
       /* ---------- boot: a hack in a blur, once per session.
            short infiltrate beat -> frantic blurred install cascade ->
@@ -1219,14 +1294,34 @@
 
         // phosphor persistence: fast scrolling leaves an afterglow
         const mainEl = document.querySelector("main");
-        let lastY = window.scrollY, ghostT = null;
+        const tearEl = document.getElementById("tear");
+        let lastY = window.scrollY, ghostT = null, lastTear = 0, lastRoll = 0;
         window.addEventListener("scroll", () => {
           const dy = Math.abs(window.scrollY - lastY);
           lastY = window.scrollY;
-          if (dy > 45 && mainEl) {
+          if (!mainEl) return;
+          if (dy > 45) {
             mainEl.classList.add("ghosting");
             clearTimeout(ghostT);
             ghostT = setTimeout(() => mainEl.classList.remove("ghosting"), 160);
+          }
+          const now = performance.now();
+          // tracking tear: genuinely fast flicks only, with cooldown
+          if (dy > 160 && now - lastTear > 1500) {
+            lastTear = now;
+            if (tearEl) {
+              tearEl.style.top = 15 + Math.random() * 60 + "vh";
+              tearEl.classList.add("on");
+              setTimeout(() => tearEl.classList.remove("on"), 190);
+            }
+            document.body.classList.add("jolt");
+            setTimeout(() => document.body.classList.remove("jolt"), 90);
+          }
+          // vertical hold slip: violent jumps, at most every 45s
+          if (dy > 420 && now - lastRoll > 45000) {
+            lastRoll = now;
+            document.body.classList.add("vroll");
+            setTimeout(() => document.body.classList.remove("vroll"), 320);
           }
         }, { passive: true });
 
