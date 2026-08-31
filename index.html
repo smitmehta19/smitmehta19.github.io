@@ -221,6 +221,8 @@
     }
     .tmux .seg { color: var(--dim); }
     .tmux .seg.active { background: var(--ac); color: #0a0c0f; padding: 0.05rem 0.6rem; font-weight: 700; }
+    .tmux button.seg { border: 0; font: inherit; cursor: pointer; transition: box-shadow 0.2s; }
+    .tmux button.seg:hover, .tmux button.seg:focus-visible { box-shadow: 0 0 12px var(--ac-glow); }
     .tmux .grow { flex: 1; }
     .tmux .clock { color: var(--text); }
     @media (max-width: 640px) { .tmux .hide-sm { display: none; } }
@@ -401,7 +403,7 @@
 
   <!-- tmux status bar -->
   <div class="tmux">
-    <span class="seg active" aria-hidden="true">0:smit</span>
+    <button class="seg active" id="win0" aria-label="Back to top" title="Back to top">0:smit-mehta</button>
     <span class="seg t-repo" aria-hidden="true">~/portfolio (main)</span>
     <span class="seg t-py" aria-hidden="true">uptime: 5+ yrs in data &amp; ai</span>
     <span class="grow"></span>
@@ -639,6 +641,26 @@
       };
       tickClock();
       setInterval(tickClock, 1000);
+
+      /* ---------- window 0: slow ride back to the top ---------- */
+      const win0 = document.getElementById("win0");
+      if (win0) {
+        win0.addEventListener("click", () => {
+          if (reduced) return window.scrollTo(0, 0);
+          const start = window.scrollY;
+          if (start < 2) return;
+          const t0 = performance.now();
+          const D = Math.min(1400, 550 + start * 0.18);
+          // timeouts, not rAF: keeps working in throttled tabs
+          const step = () => {
+            const p = Math.min(1, (performance.now() - t0) / D);
+            const e = 1 - Math.pow(1 - p, 3);
+            window.scrollTo(0, start * (1 - e));
+            if (p < 1) setTimeout(step, 16);
+          };
+          step();
+        });
+      }
 
       /* ---------- boot: a hack in a blur, once per session.
            short infiltrate beat -> frantic blurred install cascade ->
