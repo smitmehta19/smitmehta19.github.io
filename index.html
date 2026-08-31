@@ -12,7 +12,7 @@
   <meta name="twitter:card" content="summary" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #0a0c0f;
@@ -232,7 +232,7 @@
       .tmux .tico svg { width: 17px; height: 17px; }
     }
 
-    /* constant contact strip: icon links + the readable-mode eye */
+    /* constant contact strip: icon links */
     .tico {
       display: inline-flex; align-items: center; justify-content: center;
       width: 30px; height: 30px; padding: 0; margin: 0 -0.2rem;
@@ -241,26 +241,8 @@
     }
     .tico svg { width: 15px; height: 15px; }
     .tico:hover, .tico:focus-visible { color: var(--ac); background: none; border: none; }
-    #reader-toggle[aria-pressed="true"] { color: var(--ac); }
 
-    /* readable mode: effects off, prose in a proportional face */
-    body.readable .crt, body.readable .beam, body.readable #glare,
-    body.readable .pglow, body.readable #iband, body.readable .cronlog {
-      display: none;
-    }
-    body.readable { animation: none !important; }
-    body.readable .banner { text-shadow: none; }
-    body.readable pre.portrait, body.readable .cursor, body.readable .glow { text-shadow: none; box-shadow: none; }
-    body.readable .about-copy p:not(.cmd), body.readable .ls .ds,
-    body.readable .kv, body.readable .banner-sub,
-    body.readable .socials, body.readable .shell-hint {
-      font-family: Inter, "Segoe UI", sans-serif;
-      font-size: 16px;
-      letter-spacing: 0;
-    }
-    body.readable .kv b, body.readable .banner-sub b { font-weight: 600; }
-
-    main { max-width: 900px; margin: 0 auto; padding: 3.2rem 1.4rem 4rem; }
+    main { max-width: 900px; margin: 0 auto; padding: 1.6rem 1.4rem 4rem; }
 
     pre.banner {
       color: var(--ac); text-shadow: 0 0 14px var(--ac-glow);
@@ -296,9 +278,6 @@
     }
     .signal-stage { display: none; width: 100%; max-width: 300px; align-self: center; }
     #signal-canvas { width: 100%; height: 340px; display: block; }
-    body.readable .signal-stage { display: none !important; }
-    body.readable pre.portrait { display: none !important; }
-    body.readable .about-grid { grid-template-columns: 1fr; gap: 0; }
     @media (max-width: 760px) {
       .signal-stage { max-width: 250px; margin: 0 auto; }
       #signal-canvas { height: 280px; }
@@ -327,7 +306,6 @@
     @media (max-width: 640px) { .ls .ds { display: none; } body { font-size: 13.5px; } }
 
     /* skills.yml: category keys + wrapping value lists */
-    .yml { max-width: 78ch; }
     .yml .yrow { display: flex; gap: 1.2ch; padding: 0.28rem 0; align-items: baseline; }
     .yml .yk { color: var(--ac); flex: 0 0 17ch; }
     .yml .yv { color: var(--text); }
@@ -340,14 +318,14 @@
     /* experience: company line + present tag, outcome-led bullets */
     .xp .xrow {
       display: flex; justify-content: space-between; align-items: baseline;
-      gap: 1rem; max-width: 78ch;
+      gap: 1rem;
     }
     .xp .xco { color: var(--bright); font-weight: 700; }
     .xtag {
       color: var(--ac); font-size: 11px;
       letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
     }
-    .bullets { list-style: none; margin: 0.75rem 0 0; padding-left: 2ch; max-width: 76ch; }
+    .bullets { list-style: none; margin: 0.75rem 0 0; padding-left: 2ch; }
     .bullets li { color: var(--text); padding: 0.24rem 0 0.24rem 2ch; text-indent: -2ch; }
     .bullets li::before { content: "- "; color: var(--ac); }
     .bullets i { color: var(--dim); font-style: normal; }
@@ -436,9 +414,6 @@
     <a class="tico" href="https://www.linkedin.com/in/smitmehta19" rel="noopener" aria-label="Smit Mehta on LinkedIn">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.2 8h4.6v14.8H.2zM8.2 8h4.4v2h.1c.6-1.1 2.1-2.3 4.3-2.3 4.6 0 5.5 3 5.5 7v8.1h-4.6v-7.2c0-1.7 0-3.9-2.4-3.9s-2.8 1.9-2.8 3.8v7.3H8.2z"/></svg>
     </a>
-    <button class="tico" id="reader-toggle" aria-pressed="false" aria-label="Toggle readable mode" title="Readable mode">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
-    </button>
     <span class="seg t-dub" aria-hidden="true">Dublin</span>
     <span class="seg" id="wx" aria-hidden="true"></span>
     <span class="clock" id="clock" aria-hidden="true">--:--:--</span>
@@ -665,21 +640,6 @@
       };
       tickClock();
       setInterval(tickClock, 1000);
-
-      /* ---------- readable mode (the eye in the status bar) ---------- */
-      const readerBtn = document.getElementById("reader-toggle");
-      const setReadable = (on) => {
-        document.body.classList.toggle("readable", on);
-        if (readerBtn) readerBtn.setAttribute("aria-pressed", String(on));
-        try { localStorage.setItem("reader", on ? "1" : "0"); } catch (e) {}
-      };
-      try {
-        if (localStorage.getItem("reader") === "1") setReadable(true);
-      } catch (e) {}
-      if (readerBtn) {
-        readerBtn.addEventListener("click", () =>
-          setReadable(!document.body.classList.contains("readable")));
-      }
 
       /* ---------- boot: a hack in a blur, once per session.
            short infiltrate beat -> frantic blurred install cascade ->
@@ -1128,7 +1088,7 @@
       if (!reduced) {
         const GLITCH = "▓▒░#%@*+";
         const corrupt = (el, count, hold) => {
-          if (document.hidden || document.body.classList.contains("readable")) return;
+          if (document.hidden) return;
           if (!el.dataset.orig) el.dataset.orig = el.textContent;
           const orig = el.dataset.orig;
           const chars = orig.split("");
@@ -1955,7 +1915,7 @@
         });
       };
 
-      // reveal: hologram on, ASCII fallback off (readable mode overrides via CSS)
+      // reveal: hologram on, ASCII fallback off
       stage.style.display = "block";
       if (ascii) ascii.style.display = "none";
       fit();
