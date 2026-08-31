@@ -106,6 +106,15 @@
     }
     @media (prefers-reduced-motion: no-preference) { #sprog { display: none; } }
     @media (prefers-reduced-motion: reduce) { #beamgauge { display: none; } }
+    #tourcap {
+      position: fixed; left: 50%; bottom: 4.4rem; transform: translateX(-50%);
+      max-width: min(640px, 92vw); z-index: 58; display: none;
+      background: rgba(16, 20, 26, 0.94); border: 1px solid var(--ac-glow);
+      padding: 0.55rem 0.95rem; font-size: 13.5px; line-height: 1.6; color: var(--text);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.55), 0 0 14px var(--ac-soft);
+    }
+    #tourcap b { color: var(--ac); }
+
     .win.flash { animation: winflash 0.3s ease-out; }
     @keyframes winflash {
       0% { filter: brightness(2.3); box-shadow: 0 0 18px var(--ac-glow); }
@@ -665,6 +674,7 @@
       <h2 class="sr-only">Interactive shell</h2>
       <p class="shell-hint">this prompt is real: try <kbd>help</kbd>, <kbd>neofetch</kbd>, <kbd>theme green</kbd>, or <kbd>sudo hire smit</kbd> · <kbd>Tab</kbd> completes · <kbd>&uarr;</kbd> history</p>
       <p class="chips" aria-label="Quick commands">
+        <button data-run="tour">tour</button>
         <button data-run="help">help</button>
         <button data-run="ls">projects</button>
         <button data-run="neofetch">neofetch</button>
@@ -845,6 +855,7 @@
         gwake();
       }
 
+
       /* ---------- boot: a hack in a blur, once per session.
            short infiltrate beat -> frantic blurred install cascade ->
            automatic flash-bloom reveal (no gate) ---------- */
@@ -1020,6 +1031,7 @@
       const COMMANDS = {
         help: () => print(
           "available commands:\n" +
+          "  <b>tour</b>            the 40 second guided tour\n" +
           "  <b>whoami</b>          who is this\n" +
           "  <b>ls</b>              list projects\n" +
           "  <b>open</b> &lt;name&gt;     open a project (try: open swisspdf)\n" +
@@ -1596,6 +1608,67 @@
           }), 350);
         },
       });
+
+      /* ---------- ./tour.sh: attract mode. the site presents itself,
+           any human input hands control straight back ---------- */
+      const tourCap = document.createElement("div");
+      tourCap.id = "tourcap";
+      document.body.appendChild(tourCap);
+      const TOUR = [
+        ["top", "hello. this is Smit's terminal. 40 seconds, the highlights. touch anything to take over."],
+        ["about", "Smit, Dublin. AI/ML systems that reach production. the hologram is live WebGL, about 2,300 particles of him."],
+        ["exp", "day job: TAMI. RAG assistant +40% accuracy, LLM lead scoring +65% precision, XGBoost pricing 20M+ companies."],
+        ["skills", "the stack, ten categories deep: LangChain to Databricks, RAGAS to Power BI."],
+        ["projects", "shipped tools with live links. SwissPDF alone runs 30 PDF tools, fully client side."],
+        ["edu", "MSc Data Analytics from DCU, plus 14 certifications, Anthropic to AWS."],
+        ["contact", "open to senior data and AI roles. Stamp 4, no sponsorship required. one email away."],
+        ["shell", "and this prompt is real. try help, gh, or sudo hire smit. tour over, your turn."],
+      ];
+      const escT = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      let tourOn = false, tourT = 0;
+      const CANCEL_EVENTS = ["wheel", "touchmove", "keydown", "pointerdown"];
+      const endTour = (interrupted) => {
+        if (!tourOn) return;
+        tourOn = false;
+        clearTimeout(tourT);
+        tourCap.style.display = "none";
+        CANCEL_EVENTS.forEach((ev) => window.removeEventListener(ev, cancelTour, true));
+        print(interrupted
+          ? "tour interrupted. the terminal is yours."
+          : "tour complete. the prompt is yours: try <b>help</b>.", "okx");
+        if (!interrupted) input.focus({ preventScroll: true });
+      };
+      const cancelTour = () => endTour(true);
+      const tourStop = (i) => {
+        if (!tourOn) return;
+        if (i >= TOUR.length) return endTour(false);
+        const target = TOUR[i][0], text = TOUR[i][1];
+        const el = target === "top" ? null : document.getElementById(target);
+        glide(el ? el.getBoundingClientRect().top + window.scrollY - 24 : 0);
+        tourCap.style.display = "block";
+        tourCap.innerHTML = "<b>[tour]</b>&nbsp;";
+        let n = reduced ? text.length : 0;
+        const typeCap = () => {
+          if (!tourOn) return;
+          n = Math.min(text.length, n + 1);
+          const done = n >= text.length;
+          tourCap.innerHTML = "<b>[tour]</b> " + escT(text.slice(0, n)) + (done ? "" : "▌");
+          if (!done) tourT = setTimeout(typeCap, 22);
+          else tourT = setTimeout(() => tourStop(i + 1), 2300);
+        };
+        tourT = setTimeout(typeCap, reduced ? 150 : 700);
+      };
+      COMMANDS.tour = () => {
+        if (tourOn) return print("the tour is already running.", "err");
+        tourOn = true;
+        print("starting tour&hellip; touch anything to take over.", "okx");
+        input.blur();
+        setTimeout(() => {
+          CANCEL_EVENTS.forEach((ev) => window.addEventListener(ev, cancelTour, true));
+        }, 450);
+        tourStop(0);
+      };
+      COMMANDS["./tour.sh"] = COMMANDS.tour;
 
       const run = (raw) => {
         const line = raw.trim();
