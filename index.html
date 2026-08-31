@@ -1025,7 +1025,8 @@
         if (cls) p.className = cls;
         p.innerHTML = html;
         out.appendChild(p);
-        p.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
+        if (!document.body.classList.contains("touring"))
+          p.scrollIntoView({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
       };
 
       const COMMANDS = {
@@ -1630,6 +1631,7 @@
       const endTour = (interrupted) => {
         if (!tourOn) return;
         tourOn = false;
+        document.body.classList.remove("touring");
         clearTimeout(tourT);
         tourCap.style.display = "none";
         CANCEL_EVENTS.forEach((ev) => window.removeEventListener(ev, cancelTour, true));
@@ -1661,11 +1663,12 @@
       COMMANDS.tour = () => {
         if (tourOn) return print("the tour is already running.", "err");
         tourOn = true;
+        document.body.classList.add("touring");
         print("starting tour&hellip; touch anything to take over.", "okx");
         input.blur();
         setTimeout(() => {
-          CANCEL_EVENTS.forEach((ev) => window.addEventListener(ev, cancelTour, true));
-        }, 450);
+          if (tourOn) CANCEL_EVENTS.forEach((ev) => window.addEventListener(ev, cancelTour, true));
+        }, 900);
         tourStop(0);
       };
       COMMANDS["./tour.sh"] = COMMANDS.tour;
@@ -1778,13 +1781,19 @@
       input.placeholder = HINTS[0];
       setInterval(() => { input.placeholder = HINTS[++hIdx % HINTS.length]; }, 4000);
 
-      // shareable command links: ...#run=snake
+      // shareable command links: ...#run=tour
       const shared = decodeURIComponent((location.hash.match(/run=([^&]+)/) || [])[1] || "");
       if (shared) {
-        setTimeout(() => {
-          input.scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
-          run(shared);
-        }, seen ? 700 : 2800);
+        const whenIdle = () => {
+          if (!document.querySelector(".boot-screen") && tube.style.display !== "block") {
+            setTimeout(() => {
+              if (shared !== "tour")
+                input.scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
+              run(shared);
+            }, 600);
+          } else setTimeout(whenIdle, 300);
+        };
+        setTimeout(whenIdle, seen ? 400 : 1500);
       }
     })();
   </script>
