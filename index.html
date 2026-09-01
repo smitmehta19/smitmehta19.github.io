@@ -321,8 +321,11 @@
 
     /* phosphor excitation: the cursor's section glows under the beam */
     @media (hover: hover) {
-      main section, main section * { transition: text-shadow 0.4s ease; }
-      main section:hover { text-shadow: 0 0 9px var(--ac-glow); }
+      main section, main section * { transition: text-shadow 0.4s ease, filter 0.4s ease; }
+      main section:hover {
+        text-shadow: 0 0 2.5px currentColor, 0 0 14px var(--ac-glow);
+        filter: brightness(1.08);
+      }
     }
     .cmd .ps1 { color: var(--green); }
     .cmd .ps1 .path { color: var(--ac); }
@@ -692,8 +695,8 @@
       <div id="shell-out" role="log" aria-live="polite"></div>
       <div class="shell-line">
         <label for="shell-in">smit@dublin:<span class="path">~</span>$</label>
-        <input id="shell-in" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal command input" />
         <span class="cursor" aria-hidden="true" id="fake-cursor"></span>
+        <input id="shell-in" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal command input" />
       </div>
     </section>
   </main>
