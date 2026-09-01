@@ -21,6 +21,7 @@
       --bright: #eef1f4;
       --dim: #79828d;
       --ac: #e3b25f;
+      --ac-rgb: 227, 178, 95;
       --ac-soft: rgba(227, 178, 95, 0.14);
       --ac-glow: rgba(227, 178, 95, 0.45);
       --green: #8fbf7f;
@@ -29,6 +30,7 @@
 
     [data-theme="green"] {
       --ac: #7ce38b;
+      --ac-rgb: 124, 227, 139;
       --ac-soft: rgba(124, 227, 139, 0.14);
       --ac-glow: rgba(124, 227, 139, 0.45);
       --green: #b8e39a;
@@ -323,8 +325,7 @@
     @media (hover: hover) {
       main p, main li, main tr, main .yrow, main pre {
         transition: text-shadow 0.25s ease;
-        text-shadow: 0 0 calc(var(--gi, 0) * 3px) currentColor,
-                     0 0 calc(var(--gi, 0) * 16px) var(--ac-glow);
+        text-shadow: 0 0 14px rgba(var(--ac-rgb), var(--gi, 0));
       }
     }
     .cmd .ps1 { color: var(--green); }
@@ -733,7 +734,7 @@
             const nx = Math.max(rc.left, Math.min(gmx, rc.right));
             const ny = Math.max(rc.top, Math.min(gmy, rc.bottom));
             const gi = Math.max(0, 1 - Math.hypot(gmx - nx, gmy - ny) / GR);
-            if (gi > 0.02) el.style.setProperty("--gi", gi.toFixed(3));
+            if (gi > 0.02) el.style.setProperty("--gi", (gi * 0.55).toFixed(3));
             else if (el.style.getPropertyValue("--gi")) el.style.removeProperty("--gi");
           });
         };
