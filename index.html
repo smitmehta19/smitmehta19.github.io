@@ -319,12 +319,12 @@
 
     section { margin-top: 3.4rem; }
 
-    /* phosphor excitation: the cursor's section glows under the beam */
+    /* phosphor excitation: lines near the cursor glow, falling off with distance */
     @media (hover: hover) {
-      main section, main section * { transition: text-shadow 0.4s ease, filter 0.4s ease; }
-      main section:hover {
-        text-shadow: 0 0 2.5px currentColor, 0 0 14px var(--ac-glow);
-        filter: brightness(1.08);
+      main p, main li, main tr, main .yrow, main pre {
+        transition: text-shadow 0.25s ease;
+        text-shadow: 0 0 calc(var(--gi, 0) * 3px) currentColor,
+                     0 0 calc(var(--gi, 0) * 16px) var(--ac-glow);
       }
     }
     .cmd .ps1 { color: var(--green); }
@@ -716,6 +716,36 @@
       };
       tickClock();
       setInterval(tickClock, 1000);
+
+      /* ---------- phosphor excitation: glow follows the cursor ---------- */
+      if (matchMedia("(hover: hover)").matches) {
+        const glowEls = Array.from(document.querySelectorAll("main :is(p, li, tr, .yrow, pre)"));
+        const GR = 150;
+        let gmx = -9999, gmy = -9999, gQueued = false;
+        const gpaint = () => {
+          gQueued = false;
+          glowEls.forEach((el) => {
+            const rc = el.getBoundingClientRect();
+            if (rc.bottom < -60 || rc.top > innerHeight + 60) {
+              if (el.style.getPropertyValue("--gi")) el.style.removeProperty("--gi");
+              return;
+            }
+            const nx = Math.max(rc.left, Math.min(gmx, rc.right));
+            const ny = Math.max(rc.top, Math.min(gmy, rc.bottom));
+            const gi = Math.max(0, 1 - Math.hypot(gmx - nx, gmy - ny) / GR);
+            if (gi > 0.02) el.style.setProperty("--gi", gi.toFixed(3));
+            else if (el.style.getPropertyValue("--gi")) el.style.removeProperty("--gi");
+          });
+        };
+        const gq = (delay) => {
+          if (!gQueued) { gQueued = true; setTimeout(gpaint, delay); }
+        };
+        window.addEventListener("mousemove", (e) => {
+          gmx = e.clientX; gmy = e.clientY;
+          gq(40);
+        }, { passive: true });
+        window.addEventListener("scroll", () => gq(90), { passive: true });
+      }
 
       /* ---------- tmux windows: glide nav, scroll spy, progress beam ---------- */
       const glide = (targetY) => {
