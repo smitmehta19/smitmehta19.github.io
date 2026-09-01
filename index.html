@@ -318,6 +318,12 @@
     .status-pill { display: inline-block; margin-top: 0.6rem; color: var(--ac); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
 
     section { margin-top: 3.4rem; }
+
+    /* phosphor excitation: the cursor's section glows under the beam */
+    @media (hover: hover) {
+      main section, main section * { transition: text-shadow 0.4s ease; }
+      main section:hover { text-shadow: 0 0 9px var(--ac-glow); }
+    }
     .cmd .ps1 { color: var(--green); }
     .cmd .ps1 .path { color: var(--ac); }
     .cmd .typed { font-weight: 700; color: var(--bright); }
