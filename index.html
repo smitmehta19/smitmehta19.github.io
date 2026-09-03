@@ -283,7 +283,6 @@
     .tmux .grow { flex: 1; }
     .tmux .clock { color: var(--text); }
     @media (max-width: 640px) { .tmux .hide-sm { display: none; } }
-    @media (max-width: 760px) { .tmux .t-dub { display: none; } }
     @media (max-width: 640px) {
       .tmux { gap: 0.35rem; padding: 0.45rem 0.55rem; }
       .tmux .tico { width: 38px; height: 38px; }
@@ -301,10 +300,10 @@
     .tico:hover, .tico:focus-visible { color: var(--ac); background: none; border: none; }
     #dragon-toggle[aria-pressed="true"] { color: var(--ac); filter: drop-shadow(0 0 7px var(--ac-glow)); }
     @media (prefers-reduced-motion: no-preference) {
-      #dragon-toggle:not([aria-pressed="true"]) svg { animation: dragonhint 2s ease-in-out 7s 2; }
+      #dragon-toggle:not([aria-pressed="true"]) svg { animation: dragonhint 45s ease-in-out 8s infinite; }
       @keyframes dragonhint {
-        0%, 100% { transform: none; filter: none; }
-        50% { transform: scale(1.35); filter: drop-shadow(0 0 8px var(--ac-glow)); color: var(--ac); }
+        0%, 96%, 100% { filter: none; color: inherit; }
+        98% { filter: drop-shadow(0 0 6px var(--ac-glow)); color: var(--ac); }
       }
     }
     @media (prefers-reduced-motion: reduce) { #dragon-toggle { display: none; } }
@@ -512,9 +511,7 @@
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.2 8h4.6v14.8H.2zM8.2 8h4.4v2h.1c.6-1.1 2.1-2.3 4.3-2.3 4.6 0 5.5 3 5.5 7v8.1h-4.6v-7.2c0-1.7 0-3.9-2.4-3.9s-2.8 1.9-2.8 3.8v7.3H8.2z"/></svg>
     </a>
     <span class="seg hide-sm" id="pct" aria-hidden="true">--0%--</span>
-    <span class="seg t-dub" aria-hidden="true">Dublin</span>
-    <span class="seg" id="wx" aria-hidden="true"></span>
-    <span class="clock" id="clock" aria-hidden="true">--:--:--</span>
+
   </div>
 
   <main>
@@ -652,7 +649,7 @@
             <tr><td class="yr">2026</td><td class="ty">system</td><td class="nm"><a href="https://github.com/smitmehta19/second-brain" rel="noopener">second-brain</a></td><td class="ds">Notes pipeline: capture, index, resurface</td></tr>
             <tr><td class="yr">2026</td><td class="ty">app</td><td class="nm"><a href="https://smitmehta19.github.io/home-workout-app/" rel="noopener">home-gym</a><a class="aux" href="https://github.com/smitmehta19/home-workout-app" rel="noopener">[ code ]</a></td><td class="ds">Guided workouts with progressive overload, live app</td></tr>
             <tr><td class="yr">2026</td><td class="ty">app</td><td class="nm"><a href="https://smitmehta19.github.io/cookflow/" rel="noopener">cookflow</a><a class="aux" href="https://github.com/smitmehta19/cookflow" rel="noopener">[ code ]</a></td><td class="ds">Meal planning and shopping lists, live app</td></tr>
-            <tr><td class="yr">2026</td><td class="ty">agents</td><td class="nm">prompt-generator<span class="ptag">[ local ]</span></td><td class="ds">Website capture to build prompts; built this site</td></tr>
+            <tr><td class="yr">2026</td><td class="ty">agents</td><td class="nm">prompt-generator<span class="ptag">[ local ]</span></td><td class="ds">Website capture to build prompts</td></tr>
             <tr><td class="yr">2023</td><td class="ty">nlp</td><td class="nm">industry-classifier<span class="ptag">[ private ]</span></td><td class="ds">KeyBERT industry classification</td></tr>
             <tr><td class="yr">2022+</td><td class="ty">data-eng</td><td class="nm">lead-pipelines<span class="ptag">[ internal @ tami ]</span></td><td class="ds">Production Mongo + ES pipelines, see experience</td></tr>
           </tbody>
@@ -728,16 +725,6 @@
     document.documentElement.classList.add("js");
     (() => {
       const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-      /* ---------- live clock ---------- */
-      const clock = document.getElementById("clock");
-      const tickClock = () => {
-        const short = innerWidth <= 640;
-        clock.textContent = new Date().toLocaleTimeString("en-IE",
-          short ? { hour12: false, hour: "2-digit", minute: "2-digit" } : { hour12: false });
-      };
-      tickClock();
-      setInterval(tickClock, 1000);
 
       /* ---------- phosphor excitation: glow follows the cursor ---------- */
       if (matchMedia("(hover: hover)").matches) {
@@ -2068,14 +2055,14 @@
 
   function stepDragon() {
     dt2++;
-    portal.r += (portal.target - portal.r) * 0.1;
+    portal.r += (portal.target - portal.r) * (portal.target === 0 ? 0.22 : 0.1);
     portal.spin += 0.12;
 
     if (dState === "leaving") {
       const dp = Math.hypot(portal.x - head.x, portal.y - head.y);
       if (leaveHeading === null) {
         wander.x = portal.x; wander.y = portal.y;
-        head.targetSpeed = 3.2;
+        head.targetSpeed = 4.6;
         leaveTimer++;
         if (dp < 42 || leaveTimer > 420) {
           leaveHeading = Math.atan2(portal.y - innerHeight / 2, portal.x - innerWidth / 2);
