@@ -285,7 +285,7 @@
     @media (max-width: 640px) { .tmux .hide-sm { display: none; } }
     @media (max-width: 760px) { .tmux .t-dub { display: none; } }
     @media (max-width: 640px) {
-      .tmux { gap: 0.5rem; padding: 0.45rem 0.7rem; }
+      .tmux { gap: 0.35rem; padding: 0.45rem 0.55rem; }
       .tmux .tico { width: 38px; height: 38px; }
       .tmux .tico svg { width: 17px; height: 17px; }
     }
@@ -299,6 +299,22 @@
     }
     .tico svg { width: 15px; height: 15px; }
     .tico:hover, .tico:focus-visible { color: var(--ac); background: none; border: none; }
+    #dragon-toggle[aria-pressed="true"] { color: var(--ac); filter: drop-shadow(0 0 7px var(--ac-glow)); }
+    @media (prefers-reduced-motion: no-preference) {
+      #dragon-toggle:not([aria-pressed="true"]) svg { animation: dragonhint 2s ease-in-out 7s 2; }
+      @keyframes dragonhint {
+        0%, 100% { transform: none; filter: none; }
+        50% { transform: scale(1.35); filter: drop-shadow(0 0 8px var(--ac-glow)); color: var(--ac); }
+      }
+    }
+    @media (prefers-reduced-motion: reduce) { #dragon-toggle { display: none; } }
+
+    /* dragon mode: every piece of the page becomes a particle */
+    .rw { display: inline-block; }
+    .rww { display: inline-block; white-space: nowrap; }
+    main pre .rw { display: inline; }
+    #dragoncv { position: fixed; inset: 0; z-index: 46; pointer-events: none; }
+    body.dragon-on main { user-select: none; }
 
     main { max-width: 900px; margin: 0 auto; padding: 1.6rem 1.4rem 4rem; }
 
@@ -456,6 +472,7 @@
   <div class="crt" aria-hidden="true"></div>
   <div class="beam" aria-hidden="true"></div>
   <div id="sprog" aria-hidden="true"></div>
+  <canvas id="dragoncv" aria-hidden="true"></canvas>
   <canvas id="beamgauge" aria-hidden="true"></canvas>
   <div id="tear" aria-hidden="true"></div>
   <div id="glare" aria-hidden="true"></div>
@@ -481,6 +498,9 @@
       <button class="win" data-target="shell">7<span class="wn">:shell</span></button>
     </nav>
     <span class="grow"></span>
+    <button class="tico" id="dragon-toggle" aria-pressed="false" aria-label="Awaken the dragon" title="Awaken the dragon">
+      <svg viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M4 16c0-5 3.5-9.3 8.4-10.4L11 2l3.4 2.3 1-2 1.4 2.6C19.9 6.3 22 9.4 22 13c0 .8-.1 1.5-.3 2.2l-2.5-1.4-.4 2.8-2.6-1.5-.6 2.7-2.5-1.7-1 2.5-2.3-2C6.6 18.4 4 17.5 4 16zM15.2 8.6a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2z"/></svg>
+    </button>
     <a class="tico" href="https://github.com/smitmehta19" rel="noopener" aria-label="Smit Mehta on GitHub">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.17c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.75 2.69 1.25 3.35.95.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.66.41.35.77 1.05.77 2.12v3.14c0 .3.21.66.8.55A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
     </a>
@@ -1085,6 +1105,7 @@
           "  <b>neofetch</b>        the system card\n" +
           "  <b>fortune</b> · <b>cowsay</b>  wisdom delivery systems\n" +
           "  <b>breaker</b>         brick breaker, thumb friendly\n" +
+          "  <b>dragon</b>          release it. or the icon in the bar\n" +
           "  <b>theme</b> &lt;amber|green&gt;  phosphor of choice\n" +
           "  <b>clear</b>           wipe the scrollback\n" +
           "  &hellip;and a few this help does not admit to"),
@@ -1187,6 +1208,10 @@
         },
         fortune: () => print(FORTUNES[(Math.random() * FORTUNES.length) | 0], "okx"),
         breaker: () => startBreaker(),
+        dragon: () => {
+          if (window.__dragonToggle) window.__dragonToggle();
+          else print("the dragon is unavailable on this device.", "err");
+        },
         snake: () => { print("snake retired. deploying breaker&hellip;", "okx"); startBreaker(); },
         matrix: () => startMatrix(),
       });
@@ -1345,7 +1370,7 @@
       if (!reduced) {
         const GLITCH = "▓▒░#%@*+";
         const corrupt = (el, count, hold) => {
-          if (document.hidden) return;
+          if (document.hidden || document.body.classList.contains("dragonized")) return;
           if (!el.dataset.orig) el.dataset.orig = el.textContent;
           const orig = el.dataset.orig;
           const chars = orig.split("");
@@ -1837,6 +1862,782 @@
       }
     })();
   </script>
+
+<script>
+/* THE DRAGON: a golden hunter released from the status bar. Every word on
+   the page becomes a sprung particle that parts around its body. */
+(function () {
+  "use strict";
+  const btn = document.getElementById("dragon-toggle");
+  const dcv = document.getElementById("dragoncv");
+  const mainEl = document.querySelector("main");
+  if (!btn || !dcv || !mainEl) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const clamp = (v, a, b) => Math.min(Math.max(v, a), b);
+  const lerp = (a, b, x) => a + (b - a) * x;
+  const SPRING = 30, DAMP = 16, RR = 150, RK = 2100;
+  const FIXED_DT = 1 / 60, MAX_DELTA = 1 / 20, MAX_SUB = 3;
+
+  /* ---------- particles: all text plus the chips and the hologram ---------- */
+  let wrapped = false, lastDocH = 0;
+  const parts = [];
+  function makeChunk(text) {
+    const s = document.createElement("span");
+    s.className = "rw";
+    s.textContent = text;
+    return s;
+  }
+  function wrapPage() {
+    if (wrapped) return;
+    wrapped = true;
+    // finish any pending typing/reveal animations before we take the text apart
+    document.querySelectorAll("[data-type]:not([data-done])").forEach((c) => { c.dataset.done = "1"; });
+    document.querySelectorAll(".reveal:not(.in)").forEach((el) => el.classList.add("in"));
+    document.body.classList.add("dragonized");
+    const walker = document.createTreeWalker(mainEl, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => {
+        if (!n.textContent.trim()) return NodeFilter.FILTER_REJECT;
+        if (n.parentElement.closest("button, input, #tourcap")) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach((node) => {
+      const inPre = !!node.parentElement.closest("pre");
+      const frag = document.createDocumentFragment();
+      const tokens = inPre
+        ? node.textContent.split(/(\n)/).flatMap((ln) => ln === "\n" ? ["\n"] : (ln.match(/.{1,4}/g) || []))
+        : node.textContent.split(/(\s+)/);
+      tokens.forEach((tk) => {
+        if (!tk) return;
+        if (tk === "\n" || (!inPre && /^\s+$/.test(tk))) {
+          frag.appendChild(document.createTextNode(tk));
+        } else if (!inPre && tk.length > 5) {
+          const w = document.createElement("span");
+          w.className = "rww";
+          for (let i = 0; i < tk.length; i += 2) w.appendChild(makeChunk(tk.slice(i, i + 2)));
+          frag.appendChild(w);
+        } else {
+          frag.appendChild(makeChunk(tk));
+        }
+      });
+      node.parentNode.replaceChild(frag, node);
+    });
+    measure();
+  }
+  function collect() {
+    const els = [];
+    document.querySelectorAll("main .rw").forEach((el) => els.push([el, 1]));
+    document.querySelectorAll(".chips button").forEach((el) => els.push([el, 1]));
+    const sig = document.getElementById("signal-stage");
+    if (sig && getComputedStyle(sig).display !== "none") els.push([sig, 0.45]);
+    return els;
+  }
+  function measure() {
+    // rest all transforms first so rects are honest
+    parts.forEach((p) => { if (p.el.style.transform) p.el.style.transform = ""; });
+    parts.length = 0;
+    for (const [el, w] of collect()) {
+      const r = el.getBoundingClientRect();
+      if (!r.width) continue;
+      parts.push({
+        el, w,
+        hx: r.left + r.width / 2 + scrollX,
+        hy: r.top + r.height / 2 + scrollY,
+        dx: 0, dy: 0, vx: 0, vy: 0, rX: 0, rY: 0,
+      });
+    }
+    lastDocH = document.documentElement.scrollHeight;
+  }
+
+  function stepParts(dt) {
+    for (const p of parts) {
+      const sx = p.hx + p.dx - scrollX, sy = p.hy + p.dy - scrollY;
+      if (sy < -170 || sy > innerHeight + 170) continue;
+      let rx = 0, ry = 0;
+      for (const q of dragonPts) {
+        const ddx = sx - q[0], ddy = sy - q[1];
+        const d = Math.hypot(ddx, ddy);
+        if (d < RR && d > 0.5) {
+          const n = 1 - d / RR;
+          const f = RK * n * n * n * p.w;
+          rx += (ddx / d) * f;
+          ry += (ddy / d) * f;
+        }
+      }
+      const ax = rx - p.dx * SPRING - p.vx * DAMP;
+      const ay = ry - p.dy * SPRING - p.vy * DAMP;
+      p.vx += ax * dt; p.vy += ay * dt;
+      p.dx += p.vx * dt; p.dy += p.vy * dt;
+    }
+  }
+  function drawParts() {
+    for (const p of parts) {
+      const sy = p.hy + p.dy - scrollY;
+      if (sy < -170 || sy > innerHeight + 170) continue;
+      const moved = Math.abs(p.dx) > 0.1 || Math.abs(p.dy) > 0.1;
+      if (Math.abs(p.rX - p.dx) > 0.1 || Math.abs(p.rY - p.dy) > 0.1 || (!moved && (p.rX || p.rY))) {
+        p.el.style.transform = moved
+          ? `translate3d(${p.dx.toFixed(2)}px, ${p.dy.toFixed(2)}px, 0)`
+          : "";
+        p.rX = moved ? p.dx : 0;
+        p.rY = moved ? p.dy : 0;
+      }
+    }
+  }
+
+  /* ---------- the dragon ---------- */
+  const dctx = dcv.getContext("2d");
+  function sizeDragon() { dcv.width = innerWidth; dcv.height = innerHeight; }
+  sizeDragon();
+  const SEGN = 26, SEGD = 12;
+  const head = { x: -260, y: 200, a: 0, speed: 2.6, targetSpeed: 2.6 };
+  const segs = Array.from({ length: SEGN }, () => ({ x: -260, y: 200 }));
+  const wander = { x: 300, y: 200, t: 0 };
+  const pointer = { x: innerWidth / 2, y: innerHeight / 2 };
+  const dragonPts = [];
+  const dust = [];
+  const embers = [];
+  const flames = [];
+  let dt2 = 0, roarT = 240, roarLen = 0, pointerTick = -9999;
+  let burnT = 120, burnLen = 0;
+
+  let dState = "gone"; // gone | entering | roaming | leaving | closing
+  const portal = { x: 0, y: 0, r: 0, target: 0, spin: 0 };
+  let leaveHeading = null, leaveTimer = 0;
+  let enterDirX = 1, enterDirY = 0;
+
+  function visRange() {
+    let from = 0, to = SEGN, headVis = true;
+    if (dState === "entering") {
+      const past = (x, y) => (x - portal.x) * enterDirX + (y - portal.y) * enterDirY > 8;
+      headVis = past(head.x, head.y);
+      to = 0;
+      if (headVis) {
+        to = SEGN;
+        for (let i = 0; i < SEGN; i++) {
+          if (!past(segs[i].x, segs[i].y)) { to = i; break; }
+        }
+      }
+    } else if (dState === "leaving" && leaveHeading !== null) {
+      const ex = Math.cos(leaveHeading), ey = Math.sin(leaveHeading);
+      const past = (x, y) => (x - portal.x) * ex + (y - portal.y) * ey > -6;
+      headVis = !past(head.x, head.y);
+      from = SEGN;
+      for (let i = 0; i < SEGN; i++) {
+        if (!past(segs[i].x, segs[i].y)) { from = i; break; }
+      }
+      if (headVis) from = 0;
+    }
+    return { from, to, headVis };
+  }
+
+  const bw = (i) => {
+    const u = i / (SEGN - 1);
+    if (u < 0.08) return lerp(10, 14, u / 0.08);
+    return lerp(14, 2, Math.pow((u - 0.08) / 0.92, 0.85));
+  };
+
+  function edgePoint(nearX, nearY) {
+    const m = 30;
+    const cands = [
+      [nearX, m], [nearX, innerHeight - m], [m, nearY], [innerWidth - m, nearY],
+    ];
+    let best = cands[0], bd = 1e9;
+    for (const c of cands) {
+      const d = Math.hypot(c[0] - nearX, c[1] - nearY);
+      if (d < bd) { bd = d; best = c; }
+    }
+    return [clamp(best[0], 60, innerWidth - 60), clamp(best[1], 60, innerHeight - 60)];
+  }
+
+  function farWanderTarget() {
+    const minD = Math.min(innerWidth, innerHeight) * 0.45;
+    for (let tries = 0; tries < 10; tries++) {
+      const wx = 100 + Math.random() * (innerWidth - 200);
+      const wy = 100 + Math.random() * (innerHeight - 240);
+      if (Math.hypot(wx - head.x, wy - head.y) > minD) return [wx, wy];
+    }
+    return [innerWidth - head.x, innerHeight - head.y];
+  }
+
+  function stepDragon() {
+    dt2++;
+    portal.r += (portal.target - portal.r) * 0.1;
+    portal.spin += 0.12;
+
+    if (dState === "leaving") {
+      const dp = Math.hypot(portal.x - head.x, portal.y - head.y);
+      if (leaveHeading === null) {
+        wander.x = portal.x; wander.y = portal.y;
+        head.targetSpeed = 3.2;
+        leaveTimer++;
+        if (dp < 42 || leaveTimer > 420) {
+          leaveHeading = Math.atan2(portal.y - innerHeight / 2, portal.x - innerWidth / 2);
+          head.a = leaveHeading;
+          leaveTimer = 0;
+        }
+      } else {
+        head.a = leaveHeading;
+        leaveTimer++;
+        const tail = segs[SEGN - 1];
+        if (Math.hypot(tail.x - portal.x, tail.y - portal.y) < 20 || leaveTimer > 400) {
+          for (let k = 0; k < 46; k++) {
+            dust.push({
+              x: portal.x + (Math.random() - 0.5) * 30,
+              y: portal.y + (Math.random() - 0.5) * 30,
+              vx: (Math.random() - 0.5) * 2.4,
+              vy: (Math.random() - 0.5) * 2.4,
+              life: 1,
+            });
+          }
+          portal.target = 0;
+          dState = "closing";
+        }
+      }
+    } else if (dState === "closing") {
+      if (portal.r < 0.6 && dust.length === 0) dState = "gone";
+    } else {
+      if (--wander.t <= 0) {
+        const wt = farWanderTarget();
+        wander.x = wt[0]; wander.y = wt[1];
+        wander.t = 150 + Math.random() * 140;
+        head.targetSpeed = 2.2 + Math.random() * 0.7;
+      }
+      if (pointerTick > 0 && dt2 - pointerTick < 360) {
+        const dc = Math.hypot(pointer.x - head.x, pointer.y - head.y);
+        if (dc < 130) {
+          if (--burnT <= 0) { burnT = 170 + Math.random() * 90; burnLen = 46; }
+          if (burnLen > 0) {
+            burnLen--;
+            wander.x = pointer.x; wander.y = pointer.y;
+            roarLen = Math.max(roarLen, 3);
+            head.targetSpeed = 2.1;
+          } else {
+            const oa = dt2 * 0.014;
+            wander.x = pointer.x + Math.cos(oa) * 150;
+            wander.y = pointer.y + Math.sin(oa) * 150;
+            head.targetSpeed = 3.0;
+          }
+        } else {
+          wander.x = pointer.x;
+          wander.y = pointer.y;
+          burnLen = 0;
+          head.targetSpeed = 3.0;
+        }
+      }
+    }
+
+    head.speed += (head.targetSpeed - head.speed) * 0.03;
+    if (dState !== "closing" && dState !== "gone") {
+      if (leaveHeading === null) {
+        const want = Math.atan2(wander.y - head.y, wander.x - head.x);
+        let da = want - head.a;
+        da = Math.atan2(Math.sin(da), Math.cos(da));
+        const maxTurn = (dState === "leaving" &&
+          Math.hypot(portal.x - head.x, portal.y - head.y) < 140) ? 0.14 : 0.05;
+        head.a += Math.max(-maxTurn, Math.min(maxTurn, da));
+      }
+      head.x += Math.cos(head.a) * head.speed;
+      head.y += Math.sin(head.a) * head.speed;
+    }
+    if (dState === "roaming" &&
+        (head.x < 70 || head.x > innerWidth - 70 || head.y < 80 || head.y > innerHeight - 90)) {
+      wander.x = innerWidth / 2; wander.y = innerHeight / 2; wander.t = Math.max(wander.t, 40);
+    }
+    if (dState === "entering") {
+      const tail = segs[SEGN - 1];
+      const tailOut = (tail.x - portal.x) * enterDirX + (tail.y - portal.y) * enterDirY > 16;
+      if (tailOut || Math.hypot(head.x - portal.x, head.y - portal.y) > SEGN * SEGD + 60) portal.target = 0;
+      if (portal.r < 0.6 && portal.target === 0) dState = "roaming";
+    }
+
+    let px = head.x, py = head.y;
+    segs.forEach((s) => {
+      const dx = px - s.x, dy = py - s.y, dd = Math.hypot(dx, dy) || 1;
+      const pull = (dd - SEGD) / dd;
+      s.x += dx * pull * 0.92; s.y += dy * pull * 0.92;
+      px = s.x; py = s.y;
+    });
+    dragonPts.length = 0;
+    if (dState === "entering" || dState === "roaming" || dState === "leaving") {
+      const vis = visRange();
+      if (vis.headVis) dragonPts.push([head.x, head.y]);
+      for (let i = Math.max(1, vis.from); i < vis.to; i += 3) dragonPts.push([segs[i].x, segs[i].y]);
+    }
+
+    if (dState === "roaming" && dust.length < 60) {
+      const si = (Math.random() * SEGN) | 0;
+      dust.push({
+        x: segs[si].x + (Math.random() - 0.5) * 18,
+        y: segs[si].y + (Math.random() - 0.5) * 18,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5 - 0.15,
+        life: 1,
+      });
+    }
+    for (let i = dust.length - 1; i >= 0; i--) {
+      const g = dust[i];
+      g.x += g.vx; g.y += g.vy; g.life -= 0.016;
+      if (g.life <= 0) dust.splice(i, 1);
+    }
+
+    if (dState === "roaming") {
+      if (--roarT <= 0) { roarT = 340 + Math.random() * 300; roarLen = 55; }
+    }
+    if (roarLen > 0 && dState === "roaming") {
+      roarLen--;
+      const inten = Math.sin((1 - roarLen / 55) * Math.PI);
+      const cs = Math.cos(head.a), sn = Math.sin(head.a);
+      const n = Math.round(2 + inten * 5);
+      for (let k = 0; k < n; k++) {
+        const jitter = (Math.random() - 0.5) * 0.5;
+        const sp = (3.2 + Math.random() * 2.6) * (0.5 + inten * 0.6);
+        flames.push({
+          x: head.x + cs * 20, y: head.y + sn * 20,
+          vx: Math.cos(head.a + jitter) * sp,
+          vy: Math.sin(head.a + jitter) * sp - 0.2,
+          life: 1,
+          r: 2.2 + Math.random() * 2.4,
+          wob: Math.random() * 7,
+        });
+      }
+    } else if (dState !== "roaming") {
+      roarLen = 0;
+    }
+    for (let i = flames.length - 1; i >= 0; i--) {
+      const f = flames[i];
+      f.x += f.vx + Math.sin(dt2 * 0.4 + f.wob) * 0.5;
+      f.y += f.vy + Math.cos(dt2 * 0.35 + f.wob) * 0.35;
+      f.vx *= 0.955; f.vy = f.vy * 0.955 - 0.045;
+      f.life -= 0.036;
+      if (f.life <= 0) flames.splice(i, 1);
+    }
+    for (let i = embers.length - 1; i >= 0; i--) {
+      const g = embers[i];
+      g.x += g.vx; g.y += g.vy;
+      g.vx *= 0.97; g.vy *= 0.97;
+      g.life -= 0.03;
+      if (g.life <= 0) embers.splice(i, 1);
+    }
+
+    // shell output can grow the page; keep home positions honest
+    if (dt2 % 120 === 0 && document.documentElement.scrollHeight !== lastDocH) measure();
+  }
+
+  function frameAt(i) {
+    const a = i === 0 ? { x: head.x, y: head.y } : segs[i - 1];
+    const b = segs[Math.min(SEGN - 1, i + 1)];
+    const tx = a.x - b.x, ty = a.y - b.y;
+    const L = Math.hypot(tx, ty) || 1;
+    return { tx: tx / L, ty: ty / L, nx: -ty / L, ny: tx / L };
+  }
+
+  function drawWing(ax, ay, tx, ty, nx, ny, side, flap) {
+    const lens = [104, 116, 98, 72];
+    const tips = [];
+    for (let b = 0; b < 4; b++) {
+      const open = 1.35 - b * 0.30 + flap * (0.4 + b * 0.1);
+      const dxn = -tx * Math.cos(open * 0.55 + 0.35) + nx * side * Math.sin(open);
+      const dyn = -ty * Math.cos(open * 0.55 + 0.35) + ny * side * Math.sin(open);
+      const L = Math.hypot(dxn, dyn) || 1;
+      tips.push([ax + (dxn / L) * lens[b], ay + (dyn / L) * lens[b]]);
+    }
+    const rootBack = [ax - tx * 34, ay - ty * 34];
+    const pull = (p1, p2, k) => [lerp((p1[0] + p2[0]) / 2, ax, k), lerp((p1[1] + p2[1]) / 2, ay, k)];
+    dctx.beginPath();
+    dctx.moveTo(ax, ay);
+    dctx.lineTo(tips[0][0], tips[0][1]);
+    for (let b = 0; b < 3; b++) {
+      const c = pull(tips[b], tips[b + 1], 0.30);
+      dctx.quadraticCurveTo(c[0], c[1], tips[b + 1][0], tips[b + 1][1]);
+    }
+    const c2 = pull(tips[3], rootBack, 0.30);
+    dctx.quadraticCurveTo(c2[0], c2[1], rootBack[0], rootBack[1]);
+    dctx.closePath();
+    const mg = dctx.createLinearGradient(ax, ay, tips[1][0], tips[1][1]);
+    mg.addColorStop(0, side > 0 ? "rgba(238, 176, 78, 0.5)" : "rgba(196, 134, 52, 0.46)");
+    mg.addColorStop(0.55, "rgba(196, 134, 52, 0.32)");
+    mg.addColorStop(1, "rgba(150, 94, 32, 0.1)");
+    dctx.fillStyle = mg;
+    dctx.fill();
+    dctx.strokeStyle = "rgba(255, 216, 130, 0.5)";
+    dctx.lineWidth = 1.2;
+    dctx.stroke();
+    dctx.strokeStyle = "rgba(255, 226, 150, 0.8)";
+    dctx.lineWidth = 2.2;
+    for (const tp of tips) {
+      dctx.beginPath();
+      dctx.moveTo(ax, ay);
+      dctx.lineTo(tp[0], tp[1]);
+      dctx.stroke();
+    }
+    dctx.lineWidth = 1.5;
+    for (const tp of tips) {
+      const bx = tp[0] - ax, by = tp[1] - ay;
+      const L = Math.hypot(bx, by) || 1;
+      dctx.beginPath();
+      dctx.moveTo(tp[0], tp[1]);
+      dctx.lineTo(tp[0] + (bx / L) * 9, tp[1] + (by / L) * 9);
+      dctx.stroke();
+    }
+  }
+
+  function drawPortal() {
+    if (portal.r < 0.6) return;
+    const x = portal.x, y = portal.y, r = portal.r, spin = portal.spin;
+    const vg = dctx.createRadialGradient(x, y, 1, x, y, r);
+    vg.addColorStop(0, "#050607");
+    vg.addColorStop(0.72, "#0a0c0f");
+    vg.addColorStop(1, "rgba(227, 178, 95, 0.25)");
+    dctx.fillStyle = vg;
+    dctx.beginPath(); dctx.arc(x, y, r, 0, 7); dctx.fill();
+    for (let k = 0; k < 3; k++) {
+      dctx.strokeStyle = `rgba(255, ${210 - k * 25}, ${130 - k * 30}, ${0.75 - k * 0.2})`;
+      dctx.lineWidth = 2.6 - k * 0.6;
+      dctx.beginPath();
+      dctx.arc(x, y, r + 1 + k * 4, spin * (1 + k * 0.3) + k * 2.1, spin * (1 + k * 0.3) + k * 2.1 + 3.6);
+      dctx.stroke();
+    }
+    dctx.fillStyle = "rgba(255, 226, 150, 0.9)";
+    for (let k = 0; k < 6; k++) {
+      const a = spin * 1.6 + k * 1.047;
+      dctx.fillRect(x + Math.cos(a) * (r + 7) - 1, y + Math.sin(a) * (r + 7) - 1, 2, 2);
+    }
+    const gg = dctx.createRadialGradient(x, y, r, x, y, r * 2.1);
+    gg.addColorStop(0, "rgba(227, 178, 95, 0.22)");
+    gg.addColorStop(1, "rgba(227, 178, 95, 0)");
+    dctx.fillStyle = gg;
+    dctx.beginPath(); dctx.arc(x, y, r * 2.1, 0, 7); dctx.fill();
+  }
+
+  function drawFlames() {
+    if (!flames.length) return;
+    dctx.globalCompositeOperation = "lighter";
+    for (const f of flames) {
+      const rad = f.r + (1 - f.life) * 9;
+      const g = dctx.createRadialGradient(f.x, f.y, 0.3, f.x, f.y, rad);
+      if (f.life > 0.6) {
+        g.addColorStop(0, `rgba(255, 246, 214, ${(f.life * 0.9).toFixed(3)})`);
+        g.addColorStop(0.5, `rgba(255, 196, 80, ${(f.life * 0.6).toFixed(3)})`);
+        g.addColorStop(1, "rgba(255, 120, 30, 0)");
+      } else {
+        g.addColorStop(0, `rgba(255, 170, 60, ${(f.life * 0.75).toFixed(3)})`);
+        g.addColorStop(0.6, `rgba(230, 90, 25, ${(f.life * 0.5).toFixed(3)})`);
+        g.addColorStop(1, "rgba(160, 40, 10, 0)");
+      }
+      dctx.fillStyle = g;
+      dctx.beginPath(); dctx.arc(f.x, f.y, rad, 0, 7); dctx.fill();
+    }
+    dctx.globalCompositeOperation = "source-over";
+  }
+
+  function drawDragon() {
+    dctx.clearRect(0, 0, dcv.width, dcv.height);
+    if (dcv.dataset.state !== dState) dcv.dataset.state = dState;
+    if (dState === "gone") return;
+    const flap = Math.sin(dt2 * 0.085) * 0.30;
+    const vis = visRange();
+    const vFrom = vis.from, vTo = vis.to, headVis = vis.headVis;
+    const bodyCount = Math.max(0, vTo - vFrom);
+
+    for (const g of dust) {
+      dctx.fillStyle = `rgba(255, 226, 150, ${(g.life * 0.8).toFixed(3)})`;
+      dctx.fillRect(g.x, g.y, 1.6, 1.6);
+    }
+    for (const g of embers) {
+      dctx.fillStyle = `rgba(255, ${Math.round(120 + 120 * g.life)}, ${Math.round(50 * g.life)}, ${(g.life * 0.9).toFixed(3)})`;
+      dctx.fillRect(g.x, g.y, 2.2, 2.2);
+    }
+
+    if (dState === "closing") { drawPortal(); return; }
+
+    for (let i = vFrom; i < vTo; i += 3) {
+      const s = segs[i];
+      const r = bw(i) * 3;
+      const g = dctx.createRadialGradient(s.x, s.y, 1, s.x, s.y, r);
+      g.addColorStop(0, "rgba(227, 178, 95, 0.13)");
+      g.addColorStop(1, "rgba(227, 178, 95, 0)");
+      dctx.fillStyle = g;
+      dctx.beginPath(); dctx.arc(s.x, s.y, r, 0, 7); dctx.fill();
+    }
+
+    drawFlames();
+
+    if (4 >= vFrom && 4 < vTo && bodyCount > 6) {
+      const A = segs[4], f = frameAt(4);
+      drawWing(A.x, A.y, f.tx, f.ty, f.nx, f.ny, 1, flap);
+      drawWing(A.x, A.y, f.tx, f.ty, f.nx, f.ny, -1, flap);
+    }
+
+    const Lpts = [], Rpts = [];
+    for (let i = vFrom; i < vTo; i++) {
+      const s = segs[i], f = frameAt(i), w = bw(i);
+      Lpts.push([s.x + f.nx * w, s.y + f.ny * w]);
+      Rpts.push([s.x - f.nx * w, s.y - f.ny * w]);
+    }
+    const spinePath = () => {
+      if (headVis && vFrom === 0) dctx.moveTo(head.x, head.y);
+      else dctx.moveTo(segs[vFrom].x, segs[vFrom].y);
+      for (let i = vFrom; i < vTo; i++) dctx.lineTo(segs[i].x, segs[i].y);
+    };
+    if (bodyCount > 1) {
+      dctx.beginPath();
+      spinePath();
+      for (let i = Lpts.length - 1; i >= 0; i--) dctx.lineTo(Lpts[i][0], Lpts[i][1]);
+      dctx.closePath();
+      dctx.fillStyle = "#f2c473";
+      dctx.fill();
+      dctx.beginPath();
+      spinePath();
+      for (let i = Rpts.length - 1; i >= 0; i--) dctx.lineTo(Rpts[i][0], Rpts[i][1]);
+      dctx.closePath();
+      dctx.fillStyle = "#b3813a";
+      dctx.fill();
+      dctx.beginPath();
+      dctx.moveTo(Lpts[0][0], Lpts[0][1]);
+      for (let i = 1; i < Lpts.length; i++) dctx.lineTo(Lpts[i][0], Lpts[i][1]);
+      for (let i = Rpts.length - 1; i >= 0; i--) dctx.lineTo(Rpts[i][0], Rpts[i][1]);
+      dctx.closePath();
+      dctx.strokeStyle = "rgba(74, 48, 14, 0.8)";
+      dctx.lineWidth = 1.4;
+      dctx.stroke();
+    }
+
+    dctx.strokeStyle = "rgba(104, 68, 20, 0.5)";
+    dctx.lineWidth = 1.1;
+    for (let i = Math.max(1, vFrom); i < Math.min(SEGN - 1, vTo); i++) {
+      const s = segs[i], f = frameAt(i), w = bw(i) * 0.82;
+      dctx.beginPath();
+      dctx.moveTo(s.x + f.nx * w - f.tx * 1, s.y + f.ny * w - f.ty * 1);
+      dctx.lineTo(s.x - f.tx * (3 + w * 0.32), s.y - f.ty * (3 + w * 0.32));
+      dctx.lineTo(s.x - f.nx * w - f.tx * 1, s.y - f.ny * w - f.ty * 1);
+      dctx.stroke();
+    }
+    if (bodyCount > 1) {
+      dctx.strokeStyle = "rgba(255, 240, 190, 0.5)";
+      dctx.lineWidth = 1.5;
+      dctx.beginPath();
+      spinePath();
+      dctx.stroke();
+    }
+    dctx.fillStyle = "rgba(255, 236, 180, 0.9)";
+    for (let i = Math.max(2, vFrom); i < Math.min(SEGN - 4, vTo); i += 2) {
+      const s = segs[i], f = frameAt(i), w = bw(i);
+      const spike = 4 + w * 0.6;
+      const lean = (i % 4 === 0 ? 1 : -1) * 0.35;
+      dctx.beginPath();
+      dctx.moveTo(s.x + f.tx * 3, s.y + f.ty * 3);
+      dctx.lineTo(s.x - f.tx * spike + f.nx * spike * lean, s.y - f.ty * spike + f.ny * spike * lean);
+      dctx.lineTo(s.x - f.tx * 4, s.y - f.ty * 4);
+      dctx.closePath();
+      dctx.fill();
+    }
+
+    [[8, 1], [8, -1], [17, 1], [17, -1]].forEach(([i, side], li) => {
+      if (i < vFrom || i >= vTo) return;
+      const s = segs[i], f = frameAt(i), w = bw(i);
+      const paddle = Math.sin(dt2 * 0.12 + li * 1.7) * 0.25;
+      const bx = s.x + f.nx * side * (w + 2), by = s.y + f.ny * side * (w + 2);
+      const kx = bx + (f.nx * side * 13 - f.tx * 8) * Math.cos(paddle), ky = by + (f.ny * side * 13 - f.ty * 8) * Math.cos(paddle);
+      dctx.strokeStyle = side > 0 ? "#e0ac54" : "#a87b34";
+      dctx.lineWidth = 3.2;
+      dctx.beginPath(); dctx.moveTo(bx, by); dctx.lineTo(kx, ky); dctx.stroke();
+      dctx.lineWidth = 1.5;
+      dctx.strokeStyle = "#ffe2a0";
+      for (let c = -1; c <= 1; c++) {
+        dctx.beginPath();
+        dctx.moveTo(kx, ky);
+        dctx.lineTo(kx + f.nx * side * 8 - f.tx * (6 + c * 3.4), ky + f.ny * side * 8 - f.ty * (6 + c * 3.4));
+        dctx.stroke();
+      }
+    });
+
+    if (vTo === SEGN && SEGN - 1 >= vFrom) {
+      const s = segs[SEGN - 1], f = frameAt(SEGN - 1);
+      dctx.fillStyle = "rgba(255, 214, 120, 0.55)";
+      for (let c = -2; c <= 2; c++) {
+        dctx.beginPath();
+        dctx.moveTo(s.x, s.y);
+        dctx.lineTo(s.x - f.tx * 20 + f.nx * c * 8, s.y - f.ty * 20 + f.ny * c * 8);
+        dctx.lineTo(s.x - f.tx * 7 + f.nx * c * 2.6, s.y - f.ty * 7 + f.ny * c * 2.6);
+        dctx.closePath();
+        dctx.fill();
+      }
+    }
+
+    if (headVis) {
+      const hx = head.x, hy = head.y, ha = head.a;
+      const cs = Math.cos(ha), sn = Math.sin(ha);
+      const npx = -sn, npy = cs;
+      const P = (f, s) => [hx + cs * f + npx * s, hy + sn * f + npy * s];
+      const poly = (pts, fill, stroke) => {
+        dctx.beginPath();
+        dctx.moveTo(pts[0][0], pts[0][1]);
+        for (let i = 1; i < pts.length; i++) dctx.lineTo(pts[i][0], pts[i][1]);
+        dctx.closePath();
+        if (fill) { dctx.fillStyle = fill; dctx.fill(); }
+        if (stroke) { dctx.strokeStyle = stroke; dctx.lineWidth = 1.1; dctx.stroke(); }
+      };
+      poly([P(-9, 0), P(-7, 10), P(2, 12), P(9, 8), P(12, 0), P(9, -8), P(2, -12), P(-7, -10)],
+        "#eebd68", "rgba(74, 48, 14, 0.8)");
+      poly([P(0, 11), P(-12, 19), P(-3, 9)], "rgba(255, 220, 140, 0.9)");
+      poly([P(0, -11), P(-12, -19), P(-3, -9)], "rgba(255, 220, 140, 0.9)");
+      poly([P(7, 7), P(17, 4.6), P(21, 0), P(17, -4.6), P(7, -7)],
+        "#f3c878", "rgba(74, 48, 14, 0.8)");
+      dctx.strokeStyle = "rgba(104, 68, 20, 0.5)";
+      dctx.lineWidth = 1;
+      dctx.beginPath();
+      const r1 = P(8, 0), r2 = P(19, 0);
+      dctx.moveTo(r1[0], r1[1]);
+      dctx.lineTo(r2[0], r2[1]);
+      dctx.stroke();
+      dctx.fillStyle = "#6b4413";
+      [1, -1].forEach((sd) => {
+        const n1 = P(18.5, sd * 2.2);
+        dctx.beginPath(); dctx.arc(n1[0], n1[1], 1.1, 0, 7); dctx.fill();
+      });
+      dctx.strokeStyle = "#5a3c10";
+      dctx.lineWidth = 2.4;
+      [1, -1].forEach((sd) => {
+        const b1 = P(10, sd * 2.8), b2 = P(1.5, sd * 9.5);
+        dctx.beginPath();
+        dctx.moveTo(b1[0], b1[1]);
+        dctx.lineTo(b2[0], b2[1]);
+        dctx.stroke();
+      });
+      [1, -1].forEach((sd) => {
+        const e1 = P(7.5, sd * 3.4), e2 = P(2.5, sd * 8);
+        const mid = [(e1[0] + e2[0]) / 2, (e1[1] + e2[1]) / 2];
+        const eg = dctx.createRadialGradient(mid[0], mid[1], 0.3, mid[0], mid[1], 5.4);
+        eg.addColorStop(0, "rgba(255, 200, 90, 0.75)");
+        eg.addColorStop(1, "rgba(255, 200, 90, 0)");
+        dctx.fillStyle = eg;
+        dctx.beginPath(); dctx.arc(mid[0], mid[1], 5.4, 0, 7); dctx.fill();
+        dctx.strokeStyle = "#fff2c8";
+        dctx.lineWidth = 2;
+        dctx.beginPath();
+        dctx.moveTo(e1[0], e1[1]);
+        dctx.lineTo(e2[0], e2[1]);
+        dctx.stroke();
+      });
+      [1, -1].forEach((sd) => {
+        dctx.strokeStyle = "#ffedc2";
+        dctx.lineWidth = 3;
+        const h0 = P(-3.5, sd * 7.5), hc = P(-21, sd * 20), h1 = P(-40, sd * 13);
+        dctx.beginPath();
+        dctx.moveTo(h0[0], h0[1]);
+        dctx.quadraticCurveTo(hc[0], hc[1], h1[0], h1[1]);
+        dctx.stroke();
+        dctx.lineWidth = 1.3;
+        dctx.strokeStyle = "rgba(140, 96, 34, 0.8)";
+        dctx.beginPath();
+        dctx.moveTo(h0[0], h0[1]);
+        dctx.quadraticCurveTo(hc[0], hc[1], h1[0], h1[1]);
+        dctx.stroke();
+      });
+      dctx.fillStyle = "rgba(255, 205, 110, 0.88)";
+      for (let m = -3; m <= 3; m++) {
+        if (m === 0) continue;
+        const L2 = 16 + (3 - Math.abs(m)) * 6;
+        poly([P(-7, m * 3.9), P(-7 - L2, m * (5.6 + Math.abs(m))), P(-10.5, m * 2.7)],
+          "rgba(255, 205, 110, 0.88)");
+      }
+    }
+
+    drawPortal();
+  }
+
+  /* ---------- loop ---------- */
+  let on = false, prevTime = 0, acc = 0;
+  function frame(time) {
+    if (!on) return;
+    const dt = prevTime === 0 ? FIXED_DT : (time - prevTime) / 1000;
+    prevTime = time;
+    acc += Math.min(dt, MAX_DELTA);
+    let steps = 0;
+    while (acc >= FIXED_DT && steps < MAX_SUB) {
+      stepDragon();
+      stepParts(FIXED_DT);
+      acc -= FIXED_DT;
+      steps++;
+    }
+    drawParts();
+    drawDragon();
+    if (dState === "gone") {
+      on = false;
+      parts.forEach((p) => {
+        p.el.style.transform = "";
+        p.dx = p.dy = p.vx = p.vy = 0; p.rX = 0; p.rY = 0;
+      });
+      dctx.clearRect(0, 0, dcv.width, dcv.height);
+      return;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener("pointermove", (e) => {
+    pointer.x = e.clientX; pointer.y = e.clientY;
+    pointerTick = dt2;
+  }, { passive: true });
+  window.addEventListener("pointerdown", (e) => {
+    if (e.target !== btn && !btn.contains(e.target)) {
+      pointer.x = e.clientX; pointer.y = e.clientY; pointerTick = dt2;
+    }
+  });
+  window.addEventListener("resize", () => {
+    sizeDragon();
+    if (wrapped) measure();
+  });
+
+  function toggle() {
+    if (dState === "leaving" || dState === "closing") return;
+    if (dState === "gone") {
+      wrapPage();
+      prevTime = 0; acc = 0;
+      const edges = [
+        [60 + Math.random() * (innerWidth - 120), 40],
+        [60 + Math.random() * (innerWidth - 120), innerHeight - 50],
+        [40, 80 + Math.random() * (innerHeight - 200)],
+        [innerWidth - 40, 80 + Math.random() * (innerHeight - 200)],
+      ];
+      const p0 = edges[(Math.random() * 4) | 0];
+      portal.x = p0[0]; portal.y = p0[1];
+      portal.r = 0; portal.target = 44;
+      head.x = portal.x; head.y = portal.y;
+      head.a = Math.atan2(innerHeight / 2 - portal.y, innerWidth / 2 - portal.x);
+      enterDirX = Math.cos(head.a); enterDirY = Math.sin(head.a);
+      head.speed = 2.6; head.targetSpeed = 2.6;
+      segs.forEach((s) => { s.x = portal.x; s.y = portal.y; });
+      wander.x = innerWidth / 2; wander.y = innerHeight / 2; wander.t = 120;
+      leaveHeading = null; leaveTimer = 0;
+      dust.length = 0; embers.length = 0; flames.length = 0;
+      roarT = 240; roarLen = 0; burnT = 120; burnLen = 0;
+      dState = "entering";
+      on = true;
+      btn.setAttribute("aria-pressed", "true");
+      btn.setAttribute("aria-label", "Send the dragon home");
+      btn.title = "Send the dragon home";
+      document.body.classList.add("dragon-on");
+      requestAnimationFrame(frame);
+    } else {
+      const ep = edgePoint(head.x, head.y);
+      portal.x = ep[0]; portal.y = ep[1];
+      portal.target = 44;
+      leaveHeading = null; leaveTimer = 0;
+      dState = "leaving";
+      btn.setAttribute("aria-pressed", "false");
+      btn.setAttribute("aria-label", "Awaken the dragon");
+      btn.title = "Awaken the dragon";
+      document.body.classList.remove("dragon-on");
+    }
+  }
+  btn.addEventListener("click", toggle);
+  window.__dragonToggle = toggle;
+})();
+</script>
 
 <script>
 /* THE SIGNAL: particle hologram portrait. Lazy-loads Three.js; ASCII stays as fallback. */
