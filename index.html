@@ -310,11 +310,12 @@
     @media (prefers-reduced-motion: reduce) { #dragon-toggle { display: none; } }
 
     /* dragon mode: every piece of the page becomes a particle */
-    .rw { display: inline-block; }
-    .rww { display: inline-block; white-space: nowrap; }
-    main pre .rw { display: inline; }
+    .rw { display: inline-block; text-indent: 0; }
+    .rww { display: inline-block; white-space: nowrap; text-indent: 0; }
+    main pre .rw { display: inline-block; }
     #dragoncv { position: fixed; inset: 0; z-index: 46; pointer-events: none; }
     body.dragon-on main { user-select: none; }
+    body.dragonized .js .reveal { transition: none !important; opacity: 1 !important; transform: none !important; }
 
     main { max-width: 900px; margin: 0 auto; padding: 1.6rem 1.4rem 4rem; }
 
@@ -499,7 +500,7 @@
     </nav>
     <span class="grow"></span>
     <button class="tico" id="dragon-toggle" aria-pressed="false" aria-label="Awaken the dragon" title="Awaken the dragon">
-      <svg viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M4 16c0-5 3.5-9.3 8.4-10.4L11 2l3.4 2.3 1-2 1.4 2.6C19.9 6.3 22 9.4 22 13c0 .8-.1 1.5-.3 2.2l-2.5-1.4-.4 2.8-2.6-1.5-.6 2.7-2.5-1.7-1 2.5-2.3-2C6.6 18.4 4 17.5 4 16zM15.2 8.6a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2z"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M2 13 L8 10 L11 7 L21 3 L13.5 9 L22 8.5 L14.5 11.5 L16 16 L10 17 L8 15 L6 17.5 L4.5 14.5 Z M8.7 10.6 a1.2 1.2 0 1 0 0.01 2.4 a1.2 1.2 0 1 0 -0.01 -2.4"/></svg>
     </button>
     <a class="tico" href="https://github.com/smitmehta19" rel="noopener" aria-label="Smit Mehta on GitHub">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.17c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.75 2.69 1.25 3.35.95.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.66.41.35.77 1.05.77 2.12v3.14c0 .3.21.66.8.55A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
@@ -1936,20 +1937,22 @@
     return els;
   }
   function measure() {
-    // rest all transforms first so rects are honest
+    // rest all transforms, let layout fully settle, then read honest rects
     parts.forEach((p) => { if (p.el.style.transform) p.el.style.transform = ""; });
     parts.length = 0;
-    for (const [el, w] of collect()) {
-      const r = el.getBoundingClientRect();
-      if (!r.width) continue;
-      parts.push({
-        el, w,
-        hx: r.left + r.width / 2 + scrollX,
-        hy: r.top + r.height / 2 + scrollY,
-        dx: 0, dy: 0, vx: 0, vy: 0, rX: 0, rY: 0,
-      });
-    }
-    lastDocH = document.documentElement.scrollHeight;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      for (const [el, w] of collect()) {
+        const r = el.getBoundingClientRect();
+        if (!r.width) continue;
+        parts.push({
+          el, w,
+          hx: r.left + r.width / 2 + scrollX,
+          hy: r.top + r.height / 2 + scrollY,
+          dx: 0, dy: 0, vx: 0, vy: 0, rX: 0, rY: 0,
+        });
+      }
+      lastDocH = document.documentElement.scrollHeight;
+    }));
   }
 
   function stepParts(dt) {
@@ -2043,7 +2046,7 @@
   function edgePoint(nearX, nearY) {
     const m = 30;
     const cands = [
-      [nearX, m], [nearX, innerHeight - m], [m, nearY], [innerWidth - m, nearY],
+      [nearX, m], [m, nearY], [innerWidth - m, nearY],
     ];
     let best = cands[0], bd = 1e9;
     for (const c of cands) {
@@ -2223,8 +2226,6 @@
       if (g.life <= 0) embers.splice(i, 1);
     }
 
-    // shell output can grow the page; keep home positions honest
-    if (dt2 % 120 === 0 && document.documentElement.scrollHeight !== lastDocH) measure();
   }
 
   function frameAt(i) {
@@ -2610,7 +2611,10 @@
       head.a = Math.atan2(innerHeight / 2 - portal.y, innerWidth / 2 - portal.x);
       enterDirX = Math.cos(head.a); enterDirY = Math.sin(head.a);
       head.speed = 2.6; head.targetSpeed = 2.6;
-      segs.forEach((s) => { s.x = portal.x; s.y = portal.y; });
+      segs.forEach((s, i) => {
+        s.x = portal.x - enterDirX * SEGD * (i + 1);
+        s.y = portal.y - enterDirY * SEGD * (i + 1);
+      });
       wander.x = innerWidth / 2; wander.y = innerHeight / 2; wander.t = 120;
       leaveHeading = null; leaveTimer = 0;
       dust.length = 0; embers.length = 0; flames.length = 0;
